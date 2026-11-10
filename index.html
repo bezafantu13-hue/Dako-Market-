@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="am">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>DAKO MARKET - Ultimate Escrow Platform</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --bg-dark: #030712;
+    --card-bg: rgba(17, 24, 39, 0.75);
+    --card-inner: rgba(3, 7, 18, 0.85);
+    --accent-gold: #f59e0b;
+    --accent-gold-glow: rgba(245, 158, 11, 0.35);
+    --primary-blue: #3b82f6;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --border-color: rgba(55, 65, 81, 0.5);
+    --bottom-nav-bg: #0f172a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', 'Noto Sans Ethiopic', sans-serif; }
+  body {
+    background-color: var(--bg-dark);
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.25) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(6, 95, 70, 0.2) 0px, transparent 50%);
+    color: var(--text-main);
+    padding-bottom: 80px;
+    min-height: 100vh;
+  }
+
+  /* Header Bar */
+  header {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 14px 18px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  .brand-title { 
+    font-size: 22px; 
+    font-weight: 800; 
+    background: linear-gradient(135deg, #60a5fa, #34d399, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px; 
+  }
+  .balance-chip {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: var(--accent-gold);
+    padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; gap: 6px;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+  }
+
+  /* Views Management */
+  .view-tab { display: none; padding: 16px; max-width: 650px; margin: 0 auto; }
+  .view-tab.active { display: block; animation: fadeIn 0.25s ease-in-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Platform Chips Filters */
+  .platform-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 14px; scrollbar-width: none; }
+  .filter-chip {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    color: var(--text-muted); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  .filter-chip.active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+
+  /* Listing Cards (Dako Style) */
+  .item-card {
+    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
+    padding: 18px; margin-bottom: 16px; position: relative; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(16px);
+  }
+  .item-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+  }
+  .item-card[data-platform="TikTok"]::before { background: #ff0050; }
+  .item-card[data-platform="Telegram"]::before { background: #229ed9; }
+  .item-card[data-platform="Facebook"]::before { background: #1877f2; }
+  .item-card[data-platform="YouTube"]::before { background: #ff0000; }
+  .item-card[data-platform="Instagram"]::before { background: #e1306c; }
+
+  .card-header-flex { display: flex; justify-content: space-between; align-items: center; }
+  .badge-platform { font-size: 11px; padding: 4px 10px; border-radius: 8px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 700; text-transform: uppercase; }
+  .followers-info { font-size: 13px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+  .price-amount { font-size: 20px; font-weight: 800; color: #34d399; margin-top: 10px; text-shadow: 0 0 15px rgba(52, 211, 153, 0.2); }
+
+  .escrow-status-box {
+    background: var(--card-inner); border: 1px solid var(--border-color);
+    border-radius: 12px; padding: 14px; margin-top: 14px;
+  }
+
+  /* Status Badges */
+  .status-badge { display: inline-block; padding: 5px 12px; border-radius: 30px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; }
+  .status-available { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+  .status-locked { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .status-completed { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+  /* Buttons & Inputs */
+  input, select, textarea {
+    width: 100%; background: rgba(3, 7, 18, 0.85); border: 1px solid var(--border-color);
+    color: white; padding: 12px 14px; border-radius: 12px; font-size: 14px; margin-top: 6px; margin-bottom: 14px; outline: none;
+    transition: all 0.3s ease;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--primary-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+
+  button {
+    width: 100%; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; padding: 13px;
+    border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+  }
+  button.btn-success { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
+  button.btn-secondary { background: rgba(31, 41, 55, 0.8); color: #e5e7eb; border: 1px solid var(--border-color); box-shadow: none; }
+  button:active { transform: scale(0.98); }
+
+  /* Chat System */
+  .chat-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; height: 380px; display: flex; flex-direction: column; }
+  .chat-body { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+  .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.4; }
+  .chat-msg.admin { background: #1e293b; border: 1px solid #334155; color: #93c5fd; align-self: center; text-align: center; width: 95%; }
+  .chat-msg.me { background: var(--primary-blue); color: white; align-self: flex-end; }
+  .chat-msg.other { background: var(--card-inner); color: white; align-self: flex-start; }
+  .chat-footer { display: flex; padding: 10px; border-top: 1px solid var(--border-color); }
+  .chat-footer input { margin: 0; margin-right: 8px; }
+
+  /* User Profile & Dashboard Cards */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; }
+  .stat-card .title { font-size: 11px; color: var(--text-muted); font-weight: 700; }
+  .stat-card .value { font-size: 17px; font-weight: 800; margin-top: 4px; }
+
+  /* Bottom Navigation Bar */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bottom-nav-bg); border-top: 1px solid var(--border-color);
+    display: flex; justify-content: space-around; align-items: center; height: 65px; z-index: 100;
+  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 11px; text-decoration: none; cursor: pointer; }
+  .nav-item i { font-size: 18px; margin-bottom: 4px; }
+  .nav-item.active { color: var(--accent-gold); }
+
+  .fab-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; width: 50px; height: 50px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;
+    box-shadow: 0 0 20px var(--accent-gold-glow); transform: translateY(-12px); border: 3px solid var(--bg-dark); cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-title">DAKO MARKET</div>
+    <div class="balance-chip"><i class="fa-solid fa-wallet"></i> <span id="headerBalance">1,135</span> ETB</div>
+  </header>
+
+  <!-- TAB 1: MARKETPLACE -->
+  <div id="tab-marketplace" class="view-tab active">
+    <!-- Notice Banner -->
+    <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fde68a; padding: 14px; border-radius: 14px; font-size: 12px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05);">
+      🔒 <strong>100% አስተማማኝ የ Escrow ስርዓት፦</strong> ገዢው አካውንቱን መርጦ ክፍያ ሲፈጽም ገንዘቡ በአድሚን ቁጥጥር ስር (Locked) ይቀመጣል። ሻጩ አካውንቱን አስረክቦ እስኪያረጋግጥ ድረስ ገንዘቡ ደህንነቱ የተጠበቀ ነው።
+    </div>
+
+    <!-- Platform Filters -->
+    <div class="platform-filters">
+      <div class="filter-chip active" onclick="filterPlatform('all', this)">ሁሉም (All)</div>
+      <div class="filter-chip" onclick="filterPlatform('TikTok', this)"><i class="fa-brands fa-tiktok"></i> TikTok</div>
+      <div class="filter-chip" onclick="filterPlatform('Telegram', this)"><i class="fa-brands fa-telegram"></i> Telegram</div>
+      <div class="filter-chip" onclick="filterPlatform('YouTube', this)"><i class="fa-brands fa-youtube"></i> YouTube</div>
+      <div class="filter-chip" onclick="filterPlatform('Facebook', this)"><i class="fa-brands fa-facebook"></i> Facebook</div>
+      <div class="filter-chip" onclick="filterPlatform('Instagram', this)"><i class="fa-brands fa-instagram"></i> Instagram</div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="font-size: 16px;">🛒 የሚገኙ ማስታወቂያዎች (Escrow Protected)</h3>
+      <button onclick="loadListings()" class="btn-secondary" style="width: auto; padding: 6px 14px; font-size: 12px;"><i class="fa-solid fa-rotate-right"></i> አድስ</button>
+    </div>
+
+    <div id="listingsContainer" style="text-align: center; color: var(--text-muted); padding: 20px;">ማስታወቂያዎች በመጫን ላይ...</div>
+  </div>
+
+  <!-- TAB 2: ESCROW CHAT / ORDERS -->
+  <div id="tab-orders" class="view-tab">
+    <h3 style="margin-bottom: 12px;">💬 Escrow P2P ቻት እና ትዕዛዞች</h3>
+    <div class="chat-container">
+      <div class="chat-body" id="chatMsgBox">
+        <div class="chat-msg admin">
+          ⚠️ <strong>ADMIN NOTICE:</strong> እንኳን ወደ Dako Market Escrow መድረክ መጡ። ሻጩ አካውንቱን አስረክቦ ገዢው እስኪያረጋግጥ ድረስ ገንዘቡ በአድሚን ተቆልፎ ይቆያል።
+        </div>
+      </div>
+      <div class="chat-footer">
+        <input type="text" id="chatInput" placeholder="መልእክት ይጻፉ...">
+        <button style="width: auto; padding: 0 16px;" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: SELL (CREATE LISTING) -->
+  <div id="tab-sell" class="view-tab">
+    <h3 style="margin-bottom: 14px;">＋ አዲስ ማስታወቂያ አስገባ (ለሻጮች)</h3>
+    <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 16px;">
+      <p class="text-muted" style="font-size: 12px; margin-bottom: 12px; color: var(--text-muted);">አካውንት ለመሸጥ መጀመሪያ ከመለያህ መግባት አለብህ።</p>
+      
+      <label style="font-size: 12px; color: var(--text-muted);">የእቃው / የገጹ ርዕስ</label>
+      <input id="title" placeholder="ለምሳሌ፡ 20k TikTok Account">
+
+      <label style="font-size: 12px; color: var(--text-muted);">ፕላትፎርም ይምረጡ</label>
+      <select id="platform">
+        <option>TikTok</option>
+        <option>Telegram</option>
+        <option>Facebook</option>
+        <option>YouTube</option>
+        <option>Instagram</option>
+      </select>
+
+      <label style="font-size: 12px; color: var(--text-muted);">ተከታይ / መጠን</label>
+      <input id="followers" placeholder="ለምሳሌ፡ 50k Followers">
+
+      <label style="font-size: 12px; color: var(--text-muted);">መግለጫ (Description)</label>
+      <textarea id="description" rows="3" placeholder="ስለ አካውንቱ ዝርዝር መግለጫ ያስገቡ..."></textarea>
+
+      <label style="font-size: 12px; color: var(--text-muted);">ዋጋ በ (ETB)</label>
+      <input id="price" type="number" min="1" step="0.01" placeholder="ዋጋ ያስገቡ">
+
+      <button id="publish" onclick="publishListing()">ማስታወቂያውን በስኬት አስገባ</button>
+      <p id="publishmsg" style="margin-top: 10px; font-size: 13px; text-align: center; color: var(--accent-gold);"></p>
+    </div>
+  </div>
+
+  <!-- TAB 4: ACCOUNT & AUTH -->
+  <div id="tab-account" class="view-tab">
+    <!-- Profile / Wallet Box -->
+    <div style="text-align: center; margin-bottom: 16px;">
+      <div style="width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); color: black; font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);">DA</div>
+      <h3 id="userDisplayName">Dako User</h3>
+      <p id="userEmailDisplay" style="font-size: 12px; color: var(--text-muted);">dako@market.et</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="title">AVAILABLE</div>
+        <div class="value" style="color: var(--accent-green);">535 ETB</div>
+      </div>
+      <div class="stat-card">
+        <div class="title">LOCKED (ESCROW)</div>
+        <div class="value" style="color: var(--accent-gold);">600 ETB</div>
+      </div>
+    </div>
+
+    <!-- Auth Box -->
+    <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 16px;">
+      <h4 style="margin-bottom: 10px; font-size: 16px;">👤 መለያ ግባ / ፍጠር</h4>
+      <input id="email" type="email" placeholder="ኢሜይል አድራሻ">
+      <input id="password" type="password" placeholder="ሚስጥራዊ ቁጥር (Password)">
+      <div style="display: flex; gap: 10px;">
+        <button onclick="auth('signup')">መለያ ፍጠር</button>
+        <button onclick="auth('login')" class="btn-secondary">ግባ</button>
+      </div>
+      <button id="logout" onclick="signOut()" class="btn-secondary hidden" style="margin-top: 10px; color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3);">ከመለያ ውጣ</button>
+      <p id="authmsg" style="margin-top: 10px; font-size: 12px; text-align: center; color: var(--text-muted);"></p>
+    </div>
+  </div>
+
+  <!-- Bottom Fixed Navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-marketplace" onclick="switchTab('tab-marketplace')">
+      <i class="fa-solid fa-store"></i>
+      <span>Market</span>
+    </div>
+    <div class="nav-item" id="nav-orders" onclick="switchTab('tab-orders')">
+      <i class="fa-solid fa-comments"></i>
+      <span>Orders</span>
+    </div>
+    <div class="fab-btn" onclick="switchTab('tab-sell')">+</div>
+    <div class="nav-item" id="nav-account" onclick="switchTab('tab-account')">
+      <i class="fa-solid fa-user"></i>
+      <span>Account</span>
+    </div>
+  </div>
+
+<script>
+  // Supabase Setup
+  const SUPABASE_URL = 'https://luffobxejghgpfwfsnnn.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_5UQGIXDXSC3BGt9MSR-adA_YMJaHwVp';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  const $ = id => document.getElementById(id);
+  let currentUser = null;
+  let allListingsData = [];
+
+  // Tab Navigation Engine
+  function switchTab(tabId) {
+    document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    
+    $(tabId).classList.add('active');
+    
+    let navMap = { 'tab-marketplace': 'nav-marketplace', 'tab-orders': 'nav-orders', 'tab-account': 'nav-account' };
+    if(navMap[tabId]) $(navMap[tabId]).classList.add('active');
+  }
+
+  // Session Handler
+  async function checkSession() {
+    const { data } = await sb.auth.getSession();
+    currentUser = data.session?.user || null;
+    $('logout').classList.toggle('hidden', !currentUser);
+    if(currentUser) {
+      $('userEmailDisplay').textContent = currentUser.email;
+    }
+  }
+
+  // Authentication
+  async function auth(action) {
+    const email = $('email').value.trim(), password = $('password').value;
+    if (!email || !password) { $('authmsg').textContent = 'እባክዎን ኢሜይልና ፓስወርድ ያስገቡ።'; return; }
+    
+    let r = action === 'signup' 
+      ? await sb.auth.signUp({ email, password }) 
+      : await sb.auth.signInWithPassword({ email, password });
+      
+    $('authmsg').textContent = r.error ? r.error.message : (action === 'signup' ? 'መለያ ተፈጥሯል! ኢሜይልዎን ያረጋግጡ።' : 'በስኬት ገብተዋል!');
+    await checkSession();
+  }
+
+  async function signOut() {
+    await sb.auth.signOut();
+    await checkSession();
+  }
+
+  // Load Listings from Supabase
+  async function loadListings() {
+    const box = $('listingsContainer');
+    box.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">ማስታወቂያዎች በመጫን ላይ...</div>';
+    
+    const { data, error } = await sb.from('listings').select('*').order('created_at', { ascending: false }).limit(50);
+    
+    if (error) { box.innerHTML = '<div style="color:var(--accent-red);">ማስታወቂያዎችን መጫን አልተቻለም፦ ' + error.message + '</div>'; return; }
+    if (!data.length) { box.innerHTML = '<div style="text-align:center; color:var(--text-muted);">እስካሁን ምንም ማስታወቂያ አልተለጠፈም።</div>'; return; }
+    
+    allListingsData = data;
+    renderListings(data);
+  }
+
+  function renderListings(items) {
+    const box = $('listingsContainer');
+    box.innerHTML = items.map(x => {
+      let statusBadge = `<span class="status-badge status-available">🟢 ክፍት / ለመግዛት ዝግጁ</span>`;
+      let actionBtn = `<button class="btn-success" onclick="startEscrow('${x.id}', '${esc(x.title)}', ${x.price_etb})">💳 ክፍያ ፈጽምና Escrow ጀምር</button>`;
+      
+      if (x.status === 'locked') {
+        statusBadge = `<span class="status-badge status-locked">🔒 ገንዘብ በአድሚን ተይዟል (Locked)</span>`;
+        actionBtn = `<p style="font-size:12px; color:var(--accent-gold); font-weight:600; margin-top:10px;">⚠️ ክፍያ ተፈጽሟል። አድሚን ገንዘቡን ይዟል። ሻጭ አካውንቱን እያስረከበ ነው።</p>`;
+      } else if (x.status === 'completed') {
+        statusBadge = `<span class="status-badge status-completed">✅ ንግድ ተጠናቋል (Sold)</span>`;
+        actionBtn = `<p style="font-size:12px; color:#60a5fa; font-weight:600; margin-top:10px;">✨ ይህ አካውንት በስኬት ተሸጧል።</p>`;
+      }
+
+      return `
+        <div class="item-card" data-platform="${esc(x.platform)}">
+          <div class="card-header-flex">
+            <strong style="font-size: 17px; color: #f3f4f6;">${esc(x.title)}</strong>
+            <span class="badge-platform">${esc(x.platform)}</span>
+          </div>
+          <div class="followers-info">👥 ${esc(x.followers || 'መጠን አልተገለጸም')}</div>
+          <p style="font-size: 14px; color: #d1d5db; margin: 10px 0;">${esc(x.description || '')}</p>
+          <div class="price-amount">${Number(x.price_etb).toLocaleString()} ETB</div>
+          <div class="escrow-status-box">
+            <div style="margin-bottom: 8px;">${statusBadge}</div>
+            <div>${actionBtn}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function filterPlatform(platform, el) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    
+    if (platform === 'all') {
+      renderListings(allListingsData);
+    } else {
+      let filtered = allListingsData.filter(x => x.platform === platform);
+      renderListings(filtered);
+    }
+  }
+
+  // Escrow Purchase
+  async function startEscrow(id, title, price) {
+    if (!currentUser) { alert('እባክዎን መጀመሪያ ከመለያዎ ይግቡ።'); switchTab('tab-account'); return; }
+    
+    let confirmBuy = confirm(`"${title}" የተባለውን አካውንት በ ${price} ETB በ Escrow (በአድሚን አማካኝነት) ለመግዛት እርግጠኛ ኖት?`);
+    if (!confirmBuy) return;
+
+    const { error } = await sb.from('listings').update({ status: 'locked' }).eq('id', id);
+    if (error) {
+      alert('ስህተት ተፈጥሯል፦ ' + error.message);
+    } else {
+      alert('ክፍያዎ ተመዝግቧል! ገንዘቡ በአድሚን ተይዟል (Locked). አሁን ወደ ቻት መድረክ ይዛወራሉ።');
+      switchTab('tab-orders');
+      $('chatMsgBox').innerHTML += `
+        <div class="chat-msg admin">
+          🛒 <strong>አዲስ ትዕዛዝ:</strong> "${title}" በ ${price} ETB ተገዝቷል። ገንዘቡ በአድሚን ተይዟል።
+        </div>
+      `;
+      loadListings();
+    }
+  }
+
+  // Publish Listing
+  async function publishListing() {
+    if (!currentUser) { $('publishmsg').textContent = 'መጀመሪያ ከመለያህ ግባ።'; switchTab('tab-account'); return; }
+    
+    const title = $('title').value.trim(), price = Number($('price').value);
+    if (!title || !price || price <= 0) { $('publishmsg').textContent = 'እባክዎን ርዕስ እና ትክክለኛ ዋጋ ያስገቡ።'; return; }
+    
+    const { error } = await sb.from('listings').insert({
+      seller_id: currentUser.id,
+      title,
+      platform: $('platform').value,
+      description: $('description').value.trim(),
+      followers: $('followers').value.trim(),
+      price_etb: price,
+      status: 'available'
+    });
+    
+    $('publishmsg').textContent = error ? error.message : 'ማስታወቂያው በተሳካ ሁኔታ ተጨምሯል!';
+    if (!error) {
+      $('title').value = ''; $('description').value = ''; $('followers').value = ''; $('price').value = '';
+      loadListings();
+      switchTab('tab-marketplace');
+    }
+  }
+
+  // Live Chat Simulation
+  function sendChatMessage() {
+    let input = $('chatInput');
+    let txt = input.value.trim();
+    if (!txt) return;
+
+    let box = $('chatMsgBox');
+    box.innerHTML += `<div class="chat-msg me"><strong>እርስዎ:</strong> ${esc(txt)}</div>`;
+    input.value = '';
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }
+
+  // Initializing App
+  sb.auth.onAuthStateChange(() => checkSession());
+  checkSession();
+  loadListings();
+</script>
+</body>
+</html>
