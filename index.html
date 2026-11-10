@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b0f19; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
-        .glass { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .platform-tiktok { border-left: 4px solid #ff0050; }
         .platform-youtube { border-left: 4px solid #ff0000; }
         .platform-instagram { border-left: 4px solid #e1306c; }
@@ -22,41 +22,40 @@
     <!-- Header -->
     <header class="sticky top-0 z-40 glass px-4 py-3 flex items-center justify-between border-b border-gray-800">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-lg text-white shadow-lg">DM</div>
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-teal-400 flex items-center justify-center font-bold text-lg text-white shadow-lg">DM</div>
             <div>
                 <h1 class="font-bold text-lg leading-tight bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">DAKO MARKET</h1>
-                <p class="text-xs text-gray-400">Escrow Digital Platform</p>
+                <p class="text-[10px] text-gray-400">Escrow Digital Asset Marketplace</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
             <a href="tel:0961990973" class="flex items-center gap-1 bg-gray-800 hover:bg-gray-700 text-xs text-green-400 px-3 py-1.5 rounded-full border border-gray-700">
-                <i class="fa-solid font-phone"></i> <span>0961990973</span>
+                <i class="fa-solid fa-phone"></i> <span>0961990973</span>
             </a>
-            <button id="authBtn" onclick="toggleAuthModal()" class="bg-blue-600 hover:bg-blue-500 text-xs font-semibold px-4 py-2 rounded-lg transition">መለያ ግባ</button>
+            <button onclick="openAuthModal()" class="bg-blue-600 hover:bg-blue-500 text-xs font-semibold px-4 py-2 rounded-lg transition">መለያ ግባ</button>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-md mx-auto px-4 py-4 space-y-4">
-
-        <!-- Announcement Banner -->
-        <div class="glass p-4 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-900/20 to-transparent">
+    <!-- Main Marketplace View -->
+    <main id="marketView" class="max-w-md mx-auto px-4 py-4 space-y-4">
+        <!-- Banner -->
+        <div class="glass p-4 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-950/40 to-transparent">
             <div class="flex items-center justify-between text-xs text-blue-400 font-semibold mb-1">
-                <span><i class="fa-solid fa-shield-halved"></i> 100% አስተማማኝ Escrow</span>
+                <span><i class="fa-solid fa-shield-halved"></i> 100% በሰዎች Escrow የተጠበቀ ንግድ</span>
             </div>
-            <p class="text-sm font-medium text-gray-200">የሶሺያል ሚዲያ አካውንቶችን ያለምንም ስጋት በደህና ይግዙ ወይም ይሸጡ!</p>
+            <p class="text-sm font-medium text-gray-200">የሶሻል ሚዲያ አካውንቶችን ያለምንም ስጋት በደህና ይግዙ ወይም ይሸጡ!</p>
         </div>
 
         <!-- Total Stats Counter -->
         <div class="glass p-3 rounded-xl flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400"><i class="fa-solid fa-store"></i></div>
+                <div class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400"><i class="fa-solid fa-store"></i></div>
                 <div>
-                    <p class="text-xs text-gray-400">ለሽያጭ የቀረቡ አካውንቶች</p>
+                    <p class="text-[11px] text-gray-400">አጠቃላይ ለሽያጭ የቀረቡ አካውንቶች ድምር</p>
                     <p id="totalListingsCount" class="text-base font-bold text-white">0 አካውንቶች</p>
                 </div>
             </div>
-            <button onclick="loadListings()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-rotate-right"></i></button>
+            <button onclick="loadListings()" class="text-gray-400 hover:text-white p-2"><i class="fa-solid fa-rotate-right"></i></button>
         </div>
 
         <!-- Filter Buttons -->
@@ -68,7 +67,7 @@
             <button onclick="filterPlatform('Instagram')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-instagram text-purple-400"></i> Instagram</button>
         </div>
 
-        <!-- Listings Section -->
+        <!-- Listings Container -->
         <div id="listingsContainer" class="space-y-3">
             <div class="text-center py-8 text-gray-400 text-sm">አካውንቶች በመጫን ላይ ናቸው...</div>
         </div>
@@ -76,22 +75,22 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 py-2 px-6 flex justify-between items-center z-40 max-w-md mx-auto">
-        <button onclick="showTab('market')" class="flex flex-col items-center gap-1 text-blue-400">
+        <button onclick="switchTab('market')" class="flex flex-col items-center gap-1 text-blue-400">
             <i class="fa-solid fa-shop text-lg"></i>
             <span class="text-[10px]">ገበያ</span>
         </button>
-        <button onclick="showTab('dashboard')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+        <button onclick="switchTab('dashboard')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
             <i class="fa-solid fa-chart-pie text-lg"></i>
             <span class="text-[10px]">ዳሽቦርድ</span>
         </button>
         <button onclick="openSellModal()" class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white shadow-lg -mt-6">
             <i class="fa-solid fa-plus text-xl"></i>
         </button>
-        <button onclick="showTab('chat')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+        <button onclick="switchTab('chat')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
             <i class="fa-solid fa-comments text-lg"></i>
             <span class="text-[10px]">አድሚን ቻት</span>
         </button>
-        <button onclick="showTab('account')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+        <button onclick="switchTab('account')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
             <i class="fa-solid fa-user text-lg"></i>
             <span class="text-[10px]">መለያ</span>
         </button>
@@ -112,35 +111,51 @@
         }
 
         async function loadListings() {
-            const { data, error } = await supabase.from('listings').select('*').eq('status', 'active');
+            const { data, error } = await supabase.from('listings').select('*');
             const container = document.getElementById('listingsContainer');
             if (error || !data || data.length === 0) {
-                container.innerHTML = `<div class="text-center py-8 text-gray-500 text-sm">ምንም የሚሸጥ አካውንት አልተገኘም።</div>`;
+                container.innerHTML = `<div class="glass p-6 text-center rounded-2xl space-y-3"><p class="text-gray-400 text-sm">እስካሁን ምንም የሚሸጥ አካውንት አልተለጠፈም።</p><button onclick="openSellModal()" class="bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">አካውንት ለሽያጭ ፖስት አድርግ</button></div>`;
                 document.getElementById('totalListingsCount').innerText = "0 አካውንቶች";
                 return;
             }
             document.getElementById('totalListingsCount').innerText = `${data.length} አካውንቶች`;
             
             container.innerHTML = data.map(item => `
-                <div class="glass p-4 rounded-2xl space-y-3 platform-${item.platform.toLowerCase()}">
+                <div class="glass p-4 rounded-2xl space-y-3 platform-${item.platform ? item.platform.toLowerCase() : 'tiktok'}">
                     <div class="flex justify-between items-start">
                         <div>
-                            <span class="text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">${item.platform}</span>
+                            <span class="text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">${item.platform || 'Social'}</span>
                             <h3 class="font-bold text-base text-white mt-1">${item.title}</h3>
                         </div>
-                        <span class="text-xs text-green-400 font-semibold bg-green-500/10 px-2 py-1 rounded-lg">VERIFIED</span>
+                        <span class="text-[10px] text-green-400 font-semibold bg-green-500/10 px-2 py-1 rounded-lg">${item.status || 'ACTIVE'}</span>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-gray-800">
                         <div>
                             <p class="text-[10px] text-gray-400">ዋጋ</p>
-                            <p class="text-base font-extrabold text-amber-400">${item.price.toLocaleString()} ETB</p>
+                            <p class="text-base font-extrabold text-amber-400">${item.price ? item.price.toLocaleString() : 0} ETB</p>
                         </div>
-                        <button onclick="buyListing('${item.id}')" class="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg">
+                        <button onclick="alert('ግዢ ለመፈጸም እባክዎ በስልክ ቁጥር 0961990973 ይደውሉልን።')" class="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg">
                             <i class="fa-solid fa-cart-shopping"></i> Buy
                         </button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        function openSellModal() {
+            alert("አካውንት ለመለጠፍ እባክዎ መጀመሪያ መለያ ይግቡ (Sign In)።");
+        }
+
+        function openAuthModal() {
+            alert("የመግቢያ (Login/Signup) ገጽ በሂደት ላይ ነው።");
+        }
+
+        function switchTab(tab) {
+            if(tab === 'chat') {
+                alert("የአድሚን ቻት አገልግሎት በድምፅ እና በስልክ ቁጥር 0961990973 በመደወል ማግኘት ይችላሉ።");
+            } else if(tab === 'dashboard') {
+                alert("የሻጭ ዳሽቦርድ እና የገንዘብ ማውጫ (Payout) ለመጠቀም መለያ መግባት ይኖርብዎታል።");
+            }
         }
 
         window.onload = init;
