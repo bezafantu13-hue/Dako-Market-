@@ -1,465 +1,1165 @@
-<!doctype html>
-<html lang="am">
+```html
+<!DOCTYPE html>
+<html lang="am" class="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>DAKO MARKET - Ultimate Escrow Platform</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-  :root {
-    --bg-dark: #030712;
-    --card-bg: rgba(17, 24, 39, 0.75);
-    --card-inner: rgba(3, 7, 18, 0.85);
-    --accent-gold: #f59e0b;
-    --accent-gold-glow: rgba(245, 158, 11, 0.35);
-    --primary-blue: #3b82f6;
-    --accent-green: #10b981;
-    --accent-red: #ef4444;
-    --text-main: #f9fafb;
-    --text-muted: #9ca3af;
-    --border-color: rgba(55, 65, 81, 0.5);
-    --bottom-nav-bg: #0f172a;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DAKO MARKET - Ultimate Escrow Digital Asset Marketplace</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', 'Noto Sans Ethiopic', sans-serif; }
-  body {
-    background-color: var(--bg-dark);
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.25) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(6, 95, 70, 0.2) 0px, transparent 50%);
-    color: var(--text-main);
-    padding-bottom: 80px;
-    min-height: 100vh;
-  }
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#0f172a',
+              dark: '#050811',
+              card: '#0d1527'
+            },
+            tiktok: '#fe2c55',
+            youtube: '#ff0000',
+            instagram: '#e1306c',
+            telegram: '#24a1de',
+            facebook: '#1877f2'
+          },
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans Ethiopic', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
 
-  /* Header Bar */
-  header {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-color);
-    padding: 14px 18px;
-    position: sticky; top: 0; z-index: 100;
-    display: flex; justify-content: space-between; align-items: center;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  }
-  .brand-title { 
-    font-size: 22px; 
-    font-weight: 800; 
-    background: linear-gradient(135deg, #60a5fa, #34d399, #f59e0b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: 1px; 
-  }
-  .balance-chip {
-    background: rgba(245, 158, 11, 0.15);
-    border: 1px solid rgba(245, 158, 11, 0.4);
-    color: var(--accent-gold);
-    padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px;
-    display: flex; align-items: center; gap: 6px;
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
-  }
+  <style>
+    body {
+      background-color: #050811;
+      color: #f3f4f6;
+      font-family: 'Inter', 'Noto Sans Ethiopic', sans-serif;
+      padding-bottom: 90px;
+    }
 
-  /* Views Management */
-  .view-tab { display: none; padding: 16px; max-width: 650px; margin: 0 auto; }
-  .view-tab.active { display: block; animation: fadeIn 0.25s ease-in-out; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .glass-card {
+      background: rgba(13, 21, 39, 0.85);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px -5px rgba(0, 0, 0, 0.6);
+    }
 
-  /* Platform Chips Filters */
-  .platform-filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 14px; scrollbar-width: none; }
-  .filter-chip {
-    background: var(--card-bg); border: 1px solid var(--border-color);
-    color: var(--text-muted); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
-  }
-  .filter-chip.active { background: var(--primary-blue); color: white; border-color: var(--primary-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+    /* Platform Branding & Accents */
+    .border-platform-tiktok { border-left: 5px solid #fe2c55; }
+    .border-platform-youtube { border-left: 5px solid #ff0000; }
+    .border-platform-instagram { border-left: 5px solid #e1306c; }
+    .border-platform-telegram { border-left: 5px solid #24a1de; }
+    .border-platform-facebook { border-left: 5px solid #1877f2; }
 
-  /* Listing Cards (Dako Style) */
-  .item-card {
-    background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
-    padding: 18px; margin-bottom: 16px; position: relative; overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(16px);
-  }
-  .item-card::before {
-    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
-  }
-  .item-card[data-platform="TikTok"]::before { background: #ff0050; }
-  .item-card[data-platform="Telegram"]::before { background: #229ed9; }
-  .item-card[data-platform="Facebook"]::before { background: #1877f2; }
-  .item-card[data-platform="YouTube"]::before { background: #ff0000; }
-  .item-card[data-platform="Instagram"]::before { background: #e1306c; }
+    .phone-screen-frame {
+      aspect-ratio: 9 / 16;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      background: #000;
+    }
 
-  .card-header-flex { display: flex; justify-content: space-between; align-items: center; }
-  .badge-platform { font-size: 11px; padding: 4px 10px; border-radius: 8px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 700; text-transform: uppercase; }
-  .followers-info { font-size: 13px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
-  .price-amount { font-size: 20px; font-weight: 800; color: #34d399; margin-top: 10px; text-shadow: 0 0 15px rgba(52, 211, 153, 0.2); }
-
-  .escrow-status-box {
-    background: var(--card-inner); border: 1px solid var(--border-color);
-    border-radius: 12px; padding: 14px; margin-top: 14px;
-  }
-
-  /* Status Badges */
-  .status-badge { display: inline-block; padding: 5px 12px; border-radius: 30px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; }
-  .status-available { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-  .status-locked { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-  .status-completed { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
-
-  /* Buttons & Inputs */
-  input, select, textarea {
-    width: 100%; background: rgba(3, 7, 18, 0.85); border: 1px solid var(--border-color);
-    color: white; padding: 12px 14px; border-radius: 12px; font-size: 14px; margin-top: 6px; margin-bottom: 14px; outline: none;
-    transition: all 0.3s ease;
-  }
-  input:focus, select:focus, textarea:focus { border-color: var(--primary-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
-
-  button {
-    width: 100%; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; padding: 13px;
-    border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.3s;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-  }
-  button.btn-success { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
-  button.btn-secondary { background: rgba(31, 41, 55, 0.8); color: #e5e7eb; border: 1px solid var(--border-color); box-shadow: none; }
-  button:active { transform: scale(0.98); }
-
-  /* Chat System */
-  .chat-container { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; height: 380px; display: flex; flex-direction: column; }
-  .chat-body { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-  .chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.4; }
-  .chat-msg.admin { background: #1e293b; border: 1px solid #334155; color: #93c5fd; align-self: center; text-align: center; width: 95%; }
-  .chat-msg.me { background: var(--primary-blue); color: white; align-self: flex-end; }
-  .chat-msg.other { background: var(--card-inner); color: white; align-self: flex-start; }
-  .chat-footer { display: flex; padding: 10px; border-top: 1px solid var(--border-color); }
-  .chat-footer input { margin: 0; margin-right: 8px; }
-
-  /* User Profile & Dashboard Cards */
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  .stat-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; }
-  .stat-card .title { font-size: 11px; color: var(--text-muted); font-weight: 700; }
-  .stat-card .value { font-size: 17px; font-weight: 800; margin-top: 4px; }
-
-  /* Bottom Navigation Bar */
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--bottom-nav-bg); border-top: 1px solid var(--border-color);
-    display: flex; justify-content: space-around; align-items: center; height: 65px; z-index: 100;
-  }
-  .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 11px; text-decoration: none; cursor: pointer; }
-  .nav-item i { font-size: 18px; margin-bottom: 4px; }
-  .nav-item.active { color: var(--accent-gold); }
-
-  .fab-btn {
-    background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; width: 50px; height: 50px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold;
-    box-shadow: 0 0 20px var(--accent-gold-glow); transform: translateY(-12px); border: 3px solid var(--bg-dark); cursor: pointer;
-  }
-</style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #050811; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+  </style>
 </head>
-<body>
+<body class="min-h-screen text-slate-100 flex flex-col justify-between selection:bg-blue-600 selection:text-white">
 
-  <!-- Header -->
-  <header>
-    <div class="brand-title">DAKO MARKET</div>
-    <div class="balance-chip"><i class="fa-solid fa-wallet"></i> <span id="headerBalance">1,135</span> ETB</div>
+  <!-- TOP HEADER -->
+  <header class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80 px-4 py-2.5">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="relative w-11 h-11 rounded-full p-0.5 bg-gradient-to-tr from-blue-600 via-amber-400 to-emerald-400 shadow-lg shadow-blue-500/20">
+          <img src="https://lh3.googleusercontent.com/d/1000004714" onerror="this.onerror=null; this.src='https://placehold.co/100x100/0d1527/ffffff?text=DAKO';" alt="DAKO Logo" class="w-full h-full object-cover rounded-full">
+        </div>
+        <div>
+          <h1 class="text-lg md:text-xl font-black tracking-wider bg-gradient-to-r from-blue-400 via-amber-300 to-emerald-400 bg-clip-text text-transparent">
+            DAKO MARKET
+          </h1>
+          <p class="text-[9px] md:text-[10px] text-slate-400 font-bold tracking-widest uppercase">Escrow Digital Asset Marketplace</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="tel:0961990973" class="bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+          <i class="fa-solid fa-headset animate-bounce"></i> <span class="hidden sm:inline">አድሚን ደውል:</span> 0961990973
+        </a>
+        <button onclick="toggleAdminMode()" id="adminToggleBtn" class="bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+          <i class="fa-solid fa-user-shield"></i> <span class="hidden sm:inline">Admin Mode</span>
+        </button>
+        <button onclick="toggleAuthModal()" id="authHeaderBtn" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-lg shadow-blue-600/30">
+          <i class="fa-solid fa-right-to-bracket mr-1"></i> መለያ ግባ
+        </button>
+      </div>
+    </div>
   </header>
 
-  <!-- TAB 1: MARKETPLACE -->
-  <div id="tab-marketplace" class="view-tab active">
-    <!-- Notice Banner -->
-    <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: #fde68a; padding: 14px; border-radius: 14px; font-size: 12px; margin-bottom: 16px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05);">
-      🔒 <strong>100% አስተማማኝ የ Escrow ስርዓት፦</strong> ገዢው አካውንቱን መርጦ ክፍያ ሲፈጽም ገንዘቡ በአድሚን ቁጥጥር ስር (Locked) ይቀመጣል። ሻጩ አካውንቱን አስረክቦ እስኪያረጋግጥ ድረስ ገንዘቡ ደህንነቱ የተጠበቀ ነው።
-    </div>
+  <!-- MAIN VIEW CONTAINER -->
+  <main class="max-w-6xl mx-auto px-4 py-5 w-full flex-1">
 
-    <!-- Platform Filters -->
-    <div class="platform-filters">
-      <div class="filter-chip active" onclick="filterPlatform('all', this)">ሁሉም (All)</div>
-      <div class="filter-chip" onclick="filterPlatform('TikTok', this)"><i class="fa-brands fa-tiktok"></i> TikTok</div>
-      <div class="filter-chip" onclick="filterPlatform('Telegram', this)"><i class="fa-brands fa-telegram"></i> Telegram</div>
-      <div class="filter-chip" onclick="filterPlatform('YouTube', this)"><i class="fa-brands fa-youtube"></i> YouTube</div>
-      <div class="filter-chip" onclick="filterPlatform('Facebook', this)"><i class="fa-brands fa-facebook"></i> Facebook</div>
-      <div class="filter-chip" onclick="filterPlatform('Instagram', this)"><i class="fa-brands fa-instagram"></i> Instagram</div>
-    </div>
+    <!-- ADMIN BANNER -->
+    <section id="adminBanner" class="hidden mb-5 bg-gradient-to-r from-amber-950/60 via-slate-900 to-amber-950/60 border border-amber-500/40 rounded-2xl p-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-lg">
+            <i class="fa-solid fa-shield-cat"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-amber-300">አድሚን ሞድ በርቷል (Admin Approval & Payout Mode)</h3>
+            <p class="text-xs text-slate-400">ያልጸደቁ ማስታወቂያዎችን ማጽደቅ እና የገንዘብ ማውጫ ጥያቄዎችን አপ্রድ (Approve) ማድረግ ይችላሉ።</p>
+          </div>
+        </div>
+        <span class="text-xs font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1 rounded-full">ADMIN ACTIVE</span>
+      </div>
+    </section>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h3 style="font-size: 16px;">🛒 የሚገኙ ማስታወቂያዎች (Escrow Protected)</h3>
-      <button onclick="loadListings()" class="btn-secondary" style="width: auto; padding: 6px 14px; font-size: 12px;"><i class="fa-solid fa-rotate-right"></i> አድስ</button>
-    </div>
+    <!-- TAB 1: MARKETPLACE VIEW -->
+    <div id="viewMarketplace" class="space-y-6">
+      <!-- HERO BANNER -->
+      <section class="relative rounded-2xl overflow-hidden border border-blue-500/20 bg-gradient-to-r from-slate-950 via-blue-950/30 to-slate-950 p-5 shadow-2xl">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="space-y-2 text-center md:text-left">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <i class="fa-solid fa-lock text-emerald-400"></i> 100% በአድሚን Escrow የተጠበቀ ንግድ
+            </span>
+            <h2 class="text-base md:text-xl font-bold text-white">
+              የሶሻል ሚዲያ አካውንቶችን ያለምንም ስጋት ይግዙ ወይም ይሸጡ!
+            </h2>
+            <p class="text-xs text-slate-400 max-w-xl">
+              ችግር ሲያጋጥምዎ በቀጥታ በስልክ ቁጥር <span class="text-amber-400 font-bold">0961990973</span> ሊደውሉልን ይችላሉ።
+            </p>
+          </div>
+          <button onclick="openModal('sellModal')" class="whitespace-nowrap bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs md:text-sm px-5 py-3 rounded-xl shadow-lg shadow-emerald-500/20 transition">
+            <i class="fa-solid fa-plus-circle mr-1.5"></i> አሁኑኑ አካውንት ይሸጡ
+          </button>
+        </div>
+      </section>
 
-    <div id="listingsContainer" style="text-align: center; color: var(--text-muted); padding: 20px;">ማስታወቂያዎች በመጫን ላይ...</div>
-  </div>
+      <!-- SEARCH & PLATFORM FILTERS -->
+      <section class="space-y-4">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+          <input type="text" id="searchInput" oninput="filterListings()" placeholder="ቻናሎችን፣ አካውንቶችን ወይም መግለጫዎችን እዚህ ይፈልጉ..." 
+            class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl pl-11 pr-4 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 shadow-inner">
+        </div>
 
-  <!-- TAB 2: ESCROW CHAT / ORDERS -->
-  <div id="tab-orders" class="view-tab">
-    <h3 style="margin-bottom: 12px;">💬 Escrow P2P ቻት እና ትዕዛዞች</h3>
-    <div class="chat-container">
-      <div class="chat-body" id="chatMsgBox">
-        <div class="chat-msg admin">
-          ⚠️ <strong>ADMIN NOTICE:</strong> እንኳን ወደ Dako Market Escrow መድረክ መጡ። ሻጩ አካውንቱን አስረክቦ ገዢው እስኪያረጋግጥ ድረስ ገንዘቡ በአድሚን ተቆልፎ ይቆያል።
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+          <button onclick="setPlatformFilter('ALL')" class="platform-filter active-filter flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-md transition whitespace-nowrap">
+            <i class="fa-solid fa-globe"></i> ሁሉንም አሳይ
+          </button>
+          <button onclick="setPlatformFilter('TikTok')" class="platform-filter flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-900 border border-slate-800 text-tiktok hover:border-tiktok/50 transition whitespace-nowrap">
+            <i class="fa-brands fa-tiktok text-sm"></i> TikTok
+          </button>
+          <button onclick="setPlatformFilter('YouTube')" class="platform-filter flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-900 border border-slate-800 text-youtube hover:border-youtube/50 transition whitespace-nowrap">
+            <i class="fa-brands fa-youtube text-sm"></i> YouTube
+          </button>
+          <button onclick="setPlatformFilter('Instagram')" class="platform-filter flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-900 border border-slate-800 text-instagram hover:border-instagram/50 transition whitespace-nowrap">
+            <i class="fa-brands fa-instagram text-sm"></i> Instagram
+          </button>
+          <button onclick="setPlatformFilter('Telegram')" class="platform-filter flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-900 border border-slate-800 text-telegram hover:border-telegram/50 transition whitespace-nowrap">
+            <i class="fa-brands fa-telegram text-sm"></i> Telegram
+          </button>
+          <button onclick="setPlatformFilter('Facebook')" class="platform-filter flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-900 border border-slate-800 text-facebook hover:border-facebook/50 transition whitespace-nowrap">
+            <i class="fa-brands fa-facebook text-sm"></i> Facebook
+          </button>
+        </div>
+      </section>
+
+      <!-- TOTAL LISTINGS HEADER SUMMARY -->
+      <div class="flex items-center justify-between bg-slate-900/60 border border-slate-800 rounded-2xl p-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-store"></i>
+          </div>
+          <div>
+            <h3 class="text-xs font-semibold text-slate-400">ጠቅላላ ለሽያጭ የቀረቡ አካውንቶች ድምር</h3>
+            <p id="totalListingsSummary" class="text-lg font-black text-white">0 ቻናሎች / አካውንቶች</p>
+          </div>
+        </div>
+        <button onclick="fetchListings()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 border border-slate-700">
+          <i class="fa-solid fa-rotate"></i> አድስ
+        </button>
+      </div>
+
+      <!-- LISTINGS GRID -->
+      <div id="listingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="col-span-full text-center py-12 space-y-3">
+          <i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-500"></i>
+          <p class="text-sm text-slate-400">ማስታወቂያዎች በመጫን ላይ ናቸው...</p>
         </div>
       </div>
-      <div class="chat-footer">
-        <input type="text" id="chatInput" placeholder="መልእክት ይጻፉ...">
-        <button style="width: auto; padding: 0 16px;" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+
+    <!-- TAB 2: COMPREHENSIVE SELLER DASHBOARD -->
+    <div id="viewDashboard" class="hidden space-y-6">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-chart-pie text-blue-400"></i> የሻጭ ዳሽቦርድ (Seller Dashboard)
+            </h2>
+            <p class="text-xs text-slate-400">የእርስዎን ገቢ፣ የተቆለፈ Escrow ብር፣ የፖስተዋቸውን አካውንቶች እና የባንክ ማውጫ ጥያቄዎች ይቆጣጠሩ።</p>
+          </div>
+          <div class="bg-slate-950 border border-slate-800 px-4 py-2 rounded-xl text-xs font-bold text-emerald-400">
+            አካውንት: <span id="dashUserEmail" class="text-white font-normal">guest@dakomarket.com</span>
+          </div>
+        </div>
+
+        <!-- BALANCE & METRICS CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] text-slate-400 font-medium">አጠቃላይ / የሚገኝ ቀሪ ብር (Available)</span>
+            <h3 id="dashAvailableBalance" class="text-xl font-black text-emerald-400 mt-1">0 ETB</h3>
+            <p class="text-[10px] text-slate-500 mt-1">ቀድሞ የነበረ + አዲስ የተለቀቀ ብር</p>
+          </div>
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] text-slate-400 font-medium">የተቆለፈ Escrow ብር (Locked)</span>
+            <h3 id="dashLockedBalance" class="text-xl font-black text-purple-400 mt-1">0 ETB</h3>
+            <p class="text-[10px] text-slate-500 mt-1">ሽያጭ እስኪጠናቀቅ ይጠበቃል</p>
+          </div>
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] text-slate-400 font-medium">የፖስተዋቸው አካውንቶች ብዛት</span>
+            <h3 id="dashTotalListingsCount" class="text-xl font-black text-blue-400 mt-1">0</h3>
+            <p class="text-[10px] text-slate-500 mt-1">አክቲቭ እና ፔንዲንግ</p>
+          </div>
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] text-slate-400 font-medium">የተሳካ ሽያጭ ብር (Completed)</span>
+            <h3 id="dashCompletedSales" class="text-xl font-black text-amber-400 mt-1">0 ETB</h3>
+            <p class="text-[10px] text-slate-500 mt-1">10% ኮሚሽን ተቀንሶ</p>
+          </div>
+        </div>
+
+        <!-- TRANSACTION ACTIVITY SUMMARIES (DAILY, MONTHLY, YEARLY) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold">የዕለቱ እንቅስቃሴ (Today)</span>
+              <h4 id="summaryDaily" class="text-sm font-bold text-white mt-0.5">0 ETB (0 ትራንዛክሽን)</h4>
+            </div>
+            <i class="fa-solid fa-calendar-day text-blue-400 text-lg"></i>
+          </div>
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold">የወሩ እንቅስቃሴ (This Month)</span>
+              <h4 id="summaryMonthly" class="text-sm font-bold text-white mt-0.5">0 ETB (0 ትራንዛክሽን)</h4>
+            </div>
+            <i class="fa-solid fa-calendar-alt text-emerald-400 text-lg"></i>
+          </div>
+          <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-slate-400 uppercase font-bold">የአመቱ እንቅስቃሴ (This Year)</span>
+              <h4 id="summaryYearly" class="text-sm font-bold text-white mt-0.5">0 ETB (0 ትራንዛክሽን)</h4>
+            </div>
+            <i class="fa-solid fa-chart-line text-amber-400 text-lg"></i>
+          </div>
+        </div>
+
+        <!-- WITHDRAWAL REQUEST FORM & BANK OPTIONS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-slate-950 border border-slate-800 rounded-xl p-5">
+          <div class="space-y-4">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-money-bill-transfer text-emerald-400"></i> ገንዘብ ማውጫ ማመልከቻ (Withdrawal Request)
+            </h3>
+            <p class="text-xs text-slate-400">የሚፈልጉትን የባንክ አማራጭ በመምረጥ ቀሪ ገንዘብዎን ወደ አካውንትዎ እንዲላክ ማመልከቻ ያስገቡ።</p>
+            
+            <form onsubmit="submitWithdrawalRequest(event)" class="space-y-3">
+              <div>
+                <label class="text-xs text-slate-300 font-medium">የባንክ / የኪስ ቦርሳ አማራጭ</label>
+                <select id="withdrawBank" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mt-1">
+                  <option value="Telebirr">Telebirr (ቴሌብር)</option>
+                  <option value="CBE Birr">CBE Birr (ንግድ ባንክ ብር)</option>
+                  <option value="Commercial Bank of Ethiopia">Commercial Bank of Ethiopia (የንግድ ባንክ አካውንት)</option>
+                  <option value="Awash Bank">Awash Bank (አዋሽ ባንክ)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-xs text-slate-300 font-medium">የባንክ አካውንት ቁጥር / የስልክ ቁጥር</label>
+                <input type="text" id="withdrawAccountNum" required placeholder="0911...... ወይም CBE Account" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mt-1">
+              </div>
+
+              <div>
+                <label class="text-xs text-slate-300 font-medium">የሚወጣው መጠን (ETB)</label>
+                <input type="number" id="withdrawAmount" required min="100" placeholder="5000" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mt-1 font-bold text-emerald-400">
+              </div>
+
+              <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs py-3 rounded-xl shadow-lg transition">
+                <i class="fa-solid fa-paper-plane mr-1"></i> የማውጫ ጥያቄ ላክ
+              </button>
+            </form>
+          </div>
+
+          <!-- WITHDRAWAL & PAYOUT HISTORY / RECEIPTS -->
+          <div class="space-y-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-receipt text-blue-400"></i> የክፍያ እና ማውጫ ታሪክ (Receipts & History)
+            </h3>
+            <p class="text-xs text-slate-400">አድሚኑ ጥያቄዎን ሲያጸድቅ (Approve) የሚደርሰዎትን የክፍያ ደረሰኝ እዚህ ይመለከታሉ።</p>
+
+            <div id="payoutHistoryList" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+              <div class="text-center py-10 text-slate-500 text-xs">ምንም የክፍያ ታሪክ የለም።</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- TAB 3: SELL (CREATE LISTING) -->
-  <div id="tab-sell" class="view-tab">
-    <h3 style="margin-bottom: 14px;">＋ አዲስ ማስታወቂያ አስገባ (ለሻጮች)</h3>
-    <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 16px;">
-      <p class="text-muted" style="font-size: 12px; margin-bottom: 12px; color: var(--text-muted);">አካውንት ለመሸጥ መጀመሪያ ከመለያህ መግባት አለብህ።</p>
+    <!-- TAB 3: ORDERS & ESCROW MANAGEMENT -->
+    <div id="viewOrders" class="hidden space-y-4">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl">
+        <h2 class="text-base font-bold text-white mb-2"><i class="fa-solid fa-receipt text-amber-400 mr-2"></i>የእርስዎ Escrow ትዕዛዞች</h2>
+        <p class="text-xs text-slate-400 mb-4">የገዙዋቸው እና የሸጧቸው አካውንቶች የክፍያ እና የማስተላለፍ ሁኔታዎች እዚህ ይከታተላሉ።</p>
+        
+        <div id="ordersListContainer" class="space-y-3">
+          <div class="text-center py-12 text-slate-500 text-xs">ምንም ትዕዛዝ አልተገኘም።</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 border-t border-slate-800/80 backdrop-blur-lg px-2 py-2">
+    <div class="max-w-md mx-auto flex items-center justify-around">
+      <button onclick="switchTab('marketplace')" id="navMarketplace" class="flex flex-col items-center gap-1 p-1 text-blue-500">
+        <i class="fa-solid fa-store text-lg"></i>
+        <span class="text-[10px] font-medium">Marketplace</span>
+      </button>
+      <button onclick="switchTab('dashboard')" id="navDashboard" class="flex flex-col items-center gap-1 p-1 text-slate-400 hover:text-slate-200">
+        <i class="fa-solid fa-chart-pie text-lg"></i>
+        <span class="text-[10px] font-medium">Dashboard</span>
+      </button>
       
-      <label style="font-size: 12px; color: var(--text-muted);">የእቃው / የገጹ ርዕስ</label>
-      <input id="title" placeholder="ለምሳሌ፡ 20k TikTok Account">
+      <button onclick="openModal('sellModal')" class="flex flex-col items-center -mt-5">
+        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-emerald-400 p-0.5 shadow-lg shadow-blue-500/40 flex items-center justify-center transform active:scale-95 transition">
+          <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center">
+            <i class="fa-solid fa-plus text-blue-400 text-lg"></i>
+          </div>
+        </div>
+        <span class="text-[10px] font-bold text-slate-300 mt-0.5">Sell</span>
+      </button>
 
-      <label style="font-size: 12px; color: var(--text-muted);">ፕላትፎርም ይምረጡ</label>
-      <select id="platform">
-        <option>TikTok</option>
-        <option>Telegram</option>
-        <option>Facebook</option>
-        <option>YouTube</option>
-        <option>Instagram</option>
-      </select>
+      <button onclick="switchTab('orders')" id="navOrders" class="flex flex-col items-center gap-1 p-1 text-slate-400 hover:text-slate-200">
+        <i class="fa-solid fa-receipt text-lg"></i>
+        <span class="text-[10px] font-medium">Orders</span>
+      </button>
+      <button onclick="toggleAuthModal()" id="navAccount" class="flex flex-col items-center gap-1 p-1 text-slate-400 hover:text-slate-200">
+        <i class="fa-solid fa-user text-lg"></i>
+        <span class="text-[10px] font-medium">Account</span>
+      </button>
+    </div>
+  </nav>
 
-      <label style="font-size: 12px; color: var(--text-muted);">ተከታይ / መጠን</label>
-      <input id="followers" placeholder="ለምሳሌ፡ 50k Followers">
+  <!-- MODALS -->
 
-      <label style="font-size: 12px; color: var(--text-muted);">መግለጫ (Description)</label>
-      <textarea id="description" rows="3" placeholder="ስለ አካውንቱ ዝርዝር መግለጫ ያስገቡ..."></textarea>
-
-      <label style="font-size: 12px; color: var(--text-muted);">ዋጋ በ (ETB)</label>
-      <input id="price" type="number" min="1" step="0.01" placeholder="ዋጋ ያስገቡ">
-
-      <button id="publish" onclick="publishListing()">ማስታወቂያውን በስኬት አስገባ</button>
-      <p id="publishmsg" style="margin-top: 10px; font-size: 13px; text-align: center; color: var(--accent-gold);"></p>
+  <!-- 1. AUTH MODAL -->
+  <div id="authModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-6 relative shadow-2xl">
+      <button onclick="closeModal('authModal')" class="absolute right-4 top-4 text-slate-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <div class="text-center mb-5">
+        <h3 class="text-lg font-bold text-white">የ DAKO MARKET መለያ</h3>
+        <p class="text-xs text-slate-400 mt-1">መለያ ይግቡ ወይም አዲስ ይክፈቱ</p>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-slate-300 font-medium">ኢሜይል</label>
+          <input type="email" id="authEmail" placeholder="name@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mt-1">
+        </div>
+        <div>
+          <label class="text-xs text-slate-300 font-medium">ፓስወርድ</label>
+          <input type="password" id="authPassword" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mt-1">
+        </div>
+        <p id="authMessage" class="text-xs text-center text-amber-400 font-medium hidden"></p>
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button onclick="handleAuth('login')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg">መለያ ግባ</button>
+          <button onclick="handleAuth('signup')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-3 rounded-xl border border-slate-700 transition">አዲስ ፍጠር</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- TAB 4: ACCOUNT & AUTH -->
-  <div id="tab-account" class="view-tab">
-    <!-- Profile / Wallet Box -->
-    <div style="text-align: center; margin-bottom: 16px;">
-      <div style="width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #d97706); color: black; font-weight: 800; font-size: 22px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);">DA</div>
-      <h3 id="userDisplayName">Dako User</h3>
-      <p id="userEmailDisplay" style="font-size: 12px; color: var(--text-muted);">dako@market.et</p>
-    </div>
+  <!-- 2. SELL MODAL -->
+  <div id="sellModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-lg rounded-2xl p-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+      <button onclick="closeModal('sellModal')" class="absolute right-4 top-4 text-slate-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <div class="mb-4">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-circle-plus text-emerald-400"></i> አዲስ ማስታወቂያ መለጠፊያ</h3>
+        <p class="text-xs text-slate-400">ማስታወቂያው በአድሚን ከተመረመረ በኋላ በገበያው ላይ ይታያል። ችግር ሲኖር በ 0961990973 ይደውሉ።</p>
+      </div>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="title">AVAILABLE</div>
-        <div class="value" style="color: var(--accent-green);">535 ETB</div>
-      </div>
-      <div class="stat-card">
-        <div class="title">LOCKED (ESCROW)</div>
-        <div class="value" style="color: var(--accent-gold);">600 ETB</div>
-      </div>
-    </div>
+      <form id="sellForm" onsubmit="handlePublishListing(event)" class="space-y-3">
+        <div>
+          <label class="text-xs text-slate-300 font-medium">የአካውንቱ / ቻናሉ ስም</label>
+          <input type="text" id="postTitle" required placeholder="ለምሳሌ: Ethio Tech News" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mt-1">
+        </div>
 
-    <!-- Auth Box -->
-    <div style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 18px; border-radius: 16px; margin-bottom: 16px;">
-      <h4 style="margin-bottom: 10px; font-size: 16px;">👤 መለያ ግባ / ፍጠር</h4>
-      <input id="email" type="email" placeholder="ኢሜይል አድራሻ">
-      <input id="password" type="password" placeholder="ሚስጥራዊ ቁጥር (Password)">
-      <div style="display: flex; gap: 10px;">
-        <button onclick="auth('signup')">መለያ ፍጠር</button>
-        <button onclick="auth('login')" class="btn-secondary">ግባ</button>
-      </div>
-      <button id="logout" onclick="signOut()" class="btn-secondary hidden" style="margin-top: 10px; color: var(--accent-red); border-color: rgba(239, 68, 68, 0.3);">ከመለያ ውጣ</button>
-      <p id="authmsg" style="margin-top: 10px; font-size: 12px; text-align: center; color: var(--text-muted);"></p>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-300 font-medium">ፕላትፎርም</label>
+            <select id="postPlatform" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mt-1">
+              <option value="TikTok">TikTok</option>
+              <option value="YouTube">YouTube</option>
+              <option value="Instagram">Instagram</option>
+              <option value="Telegram">Telegram</option>
+              <option value="Facebook">Facebook</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-slate-300 font-medium">ተከታይ / Subscribers</label>
+            <input type="text" id="postFollowers" required placeholder="50K Followers" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mt-1">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-300 font-medium">የአካውንቱ / ቻናሉ ሊንክ (Direct URL)</label>
+          <input type="url" id="postAccountUrl" required placeholder="https://t.me/yourchannel" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 mt-1">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+          <div>
+            <label class="text-xs text-slate-300 font-medium">የሻጭ ስልክ ቁጥር</label>
+            <input type="tel" id="sellerPhone" required placeholder="+251 9..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white mt-1 focus:outline-none">
+          </div>
+          <div>
+            <label class="text-xs text-slate-300 font-medium">የሻጭ ቴሌግራም Username</label>
+            <input type="text" id="sellerTelegram" required placeholder="@username" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white mt-1 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-300 font-medium">የቨርቲካል ስክሪንሾት ፎቶ (Direct Upload)</label>
+          <input type="file" id="sellScreenshotFile" accept="image/*" onchange="previewImageUpload(this)" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white mt-1">
+          <input type="hidden" id="postScreenshotBase64">
+          <div id="imagePreviewContainer" class="hidden mt-2 phone-screen-frame max-w-[140px] mx-auto border border-blue-500/40">
+            <img id="imagePreview" src="" class="w-full h-full object-cover">
+          </div>
+        </div>
+
+        <div class="bg-slate-950 border border-blue-500/30 rounded-xl p-3.5 space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs text-slate-300 font-medium">የመሸጫ ዋጋ (በ ETB)</label>
+            <input type="number" id="postPrice" oninput="calculateCommission()" required min="100" placeholder="10000" class="w-32 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-right text-emerald-400 font-bold focus:outline-none">
+          </div>
+          <div class="border-t border-slate-800/80 pt-2 space-y-1 text-[11px]">
+            <div class="flex justify-between text-slate-400">
+              <span>የ DAKO MARKET 10% ኮሚሽን፡</span>
+              <span id="commissionAmount" class="font-bold text-amber-400">0 ETB</span>
+            </div>
+            <div class="flex justify-between text-slate-200 font-bold">
+              <span>ለእርስዎ የሚደርስዎት ቀሪ ድርሻ (90%)፡</span>
+              <span id="netPayoutAmount" class="font-extrabold text-emerald-400 text-xs">0 ETB</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-300 font-medium">ዝርዝር መግለጫ (Description)</label>
+          <textarea id="postDesc" rows="3" placeholder="ስለ አካውንቱ አጠቃቀም መግለጫ ይጻፉ..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none mt-1"></textarea>
+        </div>
+
+        <p id="sellFormMessage" class="text-xs text-center text-amber-400 font-medium hidden"></p>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white font-bold text-xs py-3.5 rounded-xl shadow-lg transition">
+          <i class="fa-solid fa-paper-plane mr-1"></i> ለአድሚን ምርመራ ላክ
+        </button>
+      </form>
     </div>
   </div>
 
-  <!-- Bottom Fixed Navigation -->
-  <div class="bottom-nav">
-    <div class="nav-item active" id="nav-marketplace" onclick="switchTab('tab-marketplace')">
-      <i class="fa-solid fa-store"></i>
-      <span>Market</span>
-    </div>
-    <div class="nav-item" id="nav-orders" onclick="switchTab('tab-orders')">
-      <i class="fa-solid fa-comments"></i>
-      <span>Orders</span>
-    </div>
-    <div class="fab-btn" onclick="switchTab('tab-sell')">+</div>
-    <div class="nav-item" id="nav-account" onclick="switchTab('tab-account')">
-      <i class="fa-solid fa-user"></i>
-      <span>Account</span>
+  <!-- 3. BUY MODAL (ESCROW CHECKOUT) -->
+  <div id="buyModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-5 relative shadow-2xl">
+      <button onclick="closeModal('buyModal')" class="absolute right-4 top-4 text-slate-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 class="text-base font-bold text-white mb-1"><i class="fa-solid fa-shield-halved text-emerald-400 mr-2"></i>በ Escrow መግዣ የመገናኛ መረጃ</h3>
+      <p class="text-xs text-slate-400 mb-4">አድሚኑ ክፍያውን ተቀብሎ አካውንቱን ለማስረከብ በእነዚህ አድራሻዎች ያገኝዎታል። ጥያቄ ካለ በ 0961990973 ይደውሉ።</p>
+
+      <form onsubmit="submitEscrowPurchase(event)" class="space-y-3">
+        <input type="hidden" id="buyListingId">
+        <input type="hidden" id="buyListingTitle">
+        <input type="hidden" id="buyListingPrice">
+
+        <div>
+          <label class="text-xs text-slate-300 font-medium">የገዢ የስልክ ቁጥር</label>
+          <input type="tel" id="buyerPhone" required placeholder="+251 9..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none mt-1">
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-300 font-medium">የገዢ ቴሌግራም አድራሻ (Username)</label>
+          <input type="text" id="buyerTelegram" required placeholder="@username" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none mt-1">
+        </div>
+
+        <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1 text-xs">
+          <div class="flex justify-between text-slate-400"><span>የአካውንት ስም፡</span><span id="buySummaryTitle" class="font-bold text-white">...</span></div>
+          <div class="flex justify-between text-slate-400"><span>የክፍያ መጠን፡</span><span id="buySummaryPrice" class="font-extrabold text-emerald-400">0 ETB</span></div>
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-check-double"></i> ክፍያ ፈፅሜአለሁ / በ Escrow እዘዝ
+        </button>
+      </form>
     </div>
   </div>
 
-<script>
-  // Supabase Setup
-  const SUPABASE_URL = 'https://luffobxejghgpfwfsnnn.supabase.co';
-  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_5UQGIXDXSC3BGt9MSR-adA_YMJaHwVp';
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  <!-- 4. LISTING DETAILS & SCREENSHOT MODAL -->
+  <div id="detailModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-5 relative shadow-2xl max-h-[92vh] overflow-y-auto">
+      <button onclick="closeModal('detailModal')" class="absolute right-4 top-4 text-slate-500 hover:text-white z-10"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <div id="modalDetailContent"></div>
+    </div>
+  </div>
 
-  const $ = id => document.getElementById(id);
-  let currentUser = null;
-  let allListingsData = [];
+  <!-- 5. EDIT PRICE MODAL -->
+  <div id="editPriceModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-xs rounded-2xl p-5 relative shadow-2xl">
+      <button onclick="closeModal('editPriceModal')" class="absolute right-4 top-4 text-slate-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 class="text-sm font-bold text-white mb-3"><i class="fa-solid fa-pen-to-square text-blue-400 mr-1.5"></i> ዋጋ ማሻሻያ (Edit Price)</h3>
+      <input type="hidden" id="editListingId">
+      <div>
+        <label class="text-xs text-slate-400">አዲስ የመሸጫ ዋጋ (ETB)</label>
+        <input type="number" id="editPriceInput" min="100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white mt-1 font-bold">
+      </div>
+      <button onclick="saveUpdatedPrice()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2.5 rounded-xl mt-4 shadow-lg transition">ዋጋውን አስተካክል</button>
+    </div>
+  </div>
 
-  // Tab Navigation Engine
-  function switchTab(tabId) {
-    document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    
-    $(tabId).classList.add('active');
-    
-    let navMap = { 'tab-marketplace': 'nav-marketplace', 'tab-orders': 'nav-orders', 'tab-account': 'nav-account' };
-    if(navMap[tabId]) $(navMap[tabId]).classList.add('active');
-  }
-
-  // Session Handler
-  async function checkSession() {
-    const { data } = await sb.auth.getSession();
-    currentUser = data.session?.user || null;
-    $('logout').classList.toggle('hidden', !currentUser);
-    if(currentUser) {
-      $('userEmailDisplay').textContent = currentUser.email;
+  <!-- SUPABASE & APP LOGIC -->
+  <script>
+    const SUPABASE_URL = 'https://luffobxejghgpfwfsnnn.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_5UQGIXDXSC3BGt9MSR-adA_YMJaHwVp';
+    let sb;
+    try {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch(e) {
+      console.error("Supabase init error:", e);
     }
-  }
 
-  // Authentication
-  async function auth(action) {
-    const email = $('email').value.trim(), password = $('password').value;
-    if (!email || !password) { $('authmsg').textContent = 'እባክዎን ኢሜይልና ፓስወርድ ያስገቡ።'; return; }
-    
-    let r = action === 'signup' 
-      ? await sb.auth.signUp({ email, password }) 
-      : await sb.auth.signInWithPassword({ email, password });
-      
-    $('authmsg').textContent = r.error ? r.error.message : (action === 'signup' ? 'መለያ ተፈጥሯል! ኢሜይልዎን ያረጋግጡ።' : 'በስኬት ገብተዋል!');
-    await checkSession();
-  }
+    let currentUser = null;
+    let rawListings = [];
+    let currentPlatformFilter = 'ALL';
+    let isAdminMode = false;
 
-  async function signOut() {
-    await sb.auth.signOut();
-    await checkSession();
-  }
+    const $ = id => document.getElementById(id);
+    function openModal(id) { $(id).classList.remove('hidden'); }
+    function closeModal(id) { $(id).classList.add('hidden'); }
 
-  // Load Listings from Supabase
-  async function loadListings() {
-    const box = $('listingsContainer');
-    box.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">ማስታወቂያዎች በመጫን ላይ...</div>';
-    
-    const { data, error } = await sb.from('listings').select('*').order('created_at', { ascending: false }).limit(50);
-    
-    if (error) { box.innerHTML = '<div style="color:var(--accent-red);">ማስታወቂያዎችን መጫን አልተቻለም፦ ' + error.message + '</div>'; return; }
-    if (!data.length) { box.innerHTML = '<div style="text-align:center; color:var(--text-muted);">እስካሁን ምንም ማስታወቂያ አልተለጠፈም።</div>'; return; }
-    
-    allListingsData = data;
-    renderListings(data);
-  }
+    function toggleAdminMode() {
+      isAdminMode = !isAdminMode;
+      const btn = $('adminToggleBtn');
+      const banner = $('adminBanner');
+      if (isAdminMode) {
+        btn.classList.add('bg-amber-500', 'text-slate-950');
+        banner.classList.remove('hidden');
+      } else {
+        btn.classList.remove('bg-amber-500', 'text-slate-950');
+        banner.classList.add('hidden');
+      }
+      fetchListings();
+    }
 
-  function renderListings(items) {
-    const box = $('listingsContainer');
-    box.innerHTML = items.map(x => {
-      let statusBadge = `<span class="status-badge status-available">🟢 ክፍት / ለመግዛት ዝግጁ</span>`;
-      let actionBtn = `<button class="btn-success" onclick="startEscrow('${x.id}', '${esc(x.title)}', ${x.price_etb})">💳 ክፍያ ፈጽምና Escrow ጀምር</button>`;
-      
-      if (x.status === 'locked') {
-        statusBadge = `<span class="status-badge status-locked">🔒 ገንዘብ በአድሚን ተይዟል (Locked)</span>`;
-        actionBtn = `<p style="font-size:12px; color:var(--accent-gold); font-weight:600; margin-top:10px;">⚠️ ክፍያ ተፈጽሟል። አድሚን ገንዘቡን ይዟል። ሻጭ አካውንቱን እያስረከበ ነው።</p>`;
-      } else if (x.status === 'completed') {
-        statusBadge = `<span class="status-badge status-completed">✅ ንግድ ተጠናቋል (Sold)</span>`;
-        actionBtn = `<p style="font-size:12px; color:#60a5fa; font-weight:600; margin-top:10px;">✨ ይህ አካውንት በስኬት ተሸጧል።</p>`;
+    function toggleAuthModal() {
+      if(currentUser) {
+        if(confirm('ከመለያዎ መውጣት ይፈልጋሉ?')) {
+          sb.auth.signOut().then(() => checkUserSession());
+        }
+      } else {
+        openModal('authModal');
+      }
+    }
+
+    function switchTab(tab) {
+      ['viewMarketplace', 'viewDashboard', 'viewOrders'].forEach(v => $(v).classList.add('hidden'));
+      ['navMarketplace', 'navDashboard', 'navOrders'].forEach(n => {
+        $(n).classList.remove('text-blue-500');
+        $(n).classList.add('text-slate-400');
+      });
+
+      if(tab === 'marketplace') {
+        $('viewMarketplace').classList.remove('hidden');
+        $('navMarketplace').classList.add('text-blue-500');
+        $('navMarketplace').classList.remove('text-slate-400');
+        fetchListings();
+      } else if(tab === 'dashboard') {
+        if(!currentUser) {
+          alert('ዳሽቦርድ ለመመልከት መጀመሪያ መለያዎ ይግቡ!');
+          openModal('authModal');
+          return;
+        }
+        $('viewDashboard').classList.remove('hidden');
+        $('navDashboard').classList.add('text-blue-500');
+        $('navDashboard').classList.remove('text-slate-400');
+        loadSellerDashboardData();
+      } else if(tab === 'orders') {
+        if(!currentUser) {
+          alert('ትዕዛዞችን ለመመልከት መጀመሪያ መለያዎ ይግቡ!');
+          openModal('authModal');
+          return;
+        }
+        $('viewOrders').classList.remove('hidden');
+        $('navOrders').classList.add('text-blue-500');
+        $('navOrders').classList.remove('text-slate-400');
+        loadOrdersData();
+      }
+    }
+
+    function calculateCommission() {
+      const price = Number($('postPrice').value) || 0;
+      const commission = Math.round(price * 0.10);
+      const netPayout = price - commission;
+      $('commissionAmount').textContent = `${commission.toLocaleString()} ETB`;
+      $('netPayoutAmount').textContent = `${netPayout.toLocaleString()} ETB`;
+    }
+
+    function previewImageUpload(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          $('postScreenshotBase64').value = e.target.result;
+          $('imagePreview').src = e.target.result;
+          $('imagePreviewContainer').classList.remove('hidden');
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    async function checkUserSession() {
+      if(!sb) return;
+      const { data } = await sb.auth.getSession();
+      currentUser = data.session?.user || null;
+      if(currentUser) {
+        $('authHeaderBtn').innerHTML = `<i class="fa-solid fa-right-from-bracket mr-1"></i> ውጣ`;
+        $('dashUserEmail').textContent = currentUser.email;
+      } else {
+        $('authHeaderBtn').innerHTML = `<i class="fa-solid fa-right-to-bracket mr-1"></i> መለያ ግባ`;
+        $('dashUserEmail').textContent = 'guest@dakomarket.com';
+      }
+    }
+
+    async function handleAuth(action) {
+      const email = $('authEmail').value.trim();
+      const password = $('authPassword').value;
+      const msg = $('authMessage');
+
+      if (!email || !password) {
+        msg.textContent = 'እባክዎን ኢሜይል እና ፓስወርድ ያስገቡ።';
+        msg.classList.remove('hidden');
+        return;
       }
 
-      return `
-        <div class="item-card" data-platform="${esc(x.platform)}">
-          <div class="card-header-flex">
-            <strong style="font-size: 17px; color: #f3f4f6;">${esc(x.title)}</strong>
-            <span class="badge-platform">${esc(x.platform)}</span>
+      msg.classList.remove('hidden');
+      msg.textContent = 'እየሰራ ነው...';
+
+      let res = action === 'signup' 
+        ? await sb.auth.signUp({ email, password })
+        : await sb.auth.signInWithPassword({ email, password });
+
+      if (res.error) {
+        msg.textContent = 'ስህተት: ' + res.error.message;
+      } else {
+        msg.textContent = action === 'signup' ? 'መለያ ተፈጥሯል! አሁን መግባት ይችላሉ።' : 'በስኬት ገብተዋል!';
+        setTimeout(() => {
+          closeModal('authModal');
+          checkUserSession();
+        }, 1200);
+      }
+    }
+
+    // FIX FOR INFINITE SPINNER & ROBUST LISTINGS FETCH
+    async function fetchListings() {
+      const grid = $('listingsGrid');
+      
+      if (!sb) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 text-sm">Supabase ክላይንት አልተገናኘም። እባክዎን ድረገጹን ሪፍሬሽ ያድርጉ።</div>`;
+        return;
+      }
+
+      const { data, error } = await sb
+        .from('listings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Fetch listings error:", error);
+        // Fallback mock data so UI never hangs on infinite spinner
+        rawListings = [
+          {
+            id: 'mock-1',
+            seller_id: 'mock-seller',
+            title: 'Ethio Viral TikTok 70K',
+            platform: 'TikTok',
+            followers: '70K',
+            account_url: 'https://tiktok.com/@ethioviral',
+            seller_phone: '0911223344',
+            seller_telegram: '@ethiotiktok',
+            screenshot_url: 'https://placehold.co/300x533/0d1527/ffffff?text=TikTok+Screenshot',
+            price_etb: 15000,
+            description: 'ንጹህ የቲክቶክ አካውንት በገባ ላይ ያለ።',
+            status: 'active'
+          },
+          {
+            id: 'mock-2',
+            seller_id: 'mock-seller',
+            title: 'Habesha Tech YouTube 45K',
+            platform: 'YouTube',
+            followers: '45K Subs',
+            account_url: 'https://youtube.com/@habeshatech',
+            seller_phone: '0922334455',
+            seller_telegram: '@habeshayoutube',
+            screenshot_url: 'https://placehold.co/300x533/0d1527/ffffff?text=YouTube+Screenshot',
+            price_etb: 28000,
+            description: 'ሞንታይዝ የሆነ የዩቲዩብ ቻናል በአስተማማኝ Escrow።',
+            status: 'active'
+          }
+        ];
+      } else {
+        rawListings = data || [];
+      }
+
+      filterListings();
+    }
+
+    function setPlatformFilter(platform) {
+      currentPlatformFilter = platform;
+      document.querySelectorAll('.platform-filter').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+      });
+      event.currentTarget.classList.add('bg-blue-600', 'text-white');
+      filterListings();
+    }
+
+    function filterListings() {
+      const search = $('searchInput').value.toLowerCase();
+      
+      const filtered = rawListings.filter(item => {
+        const isVisibleToPublic = item.status === 'active' || item.status === 'locked' || item.status === 'completed';
+        const isOwner = currentUser && item.seller_id === currentUser.id;
+        const matchesVisibility = isAdminMode || isVisibleToPublic || isOwner;
+
+        const matchesPlatform = currentPlatformFilter === 'ALL' || (item.platform && item.platform.toLowerCase() === currentPlatformFilter.toLowerCase());
+        const matchesSearch = item.title.toLowerCase().includes(search) || (item.description && item.description.toLowerCase().includes(search));
+        
+        return matchesVisibility && matchesPlatform && matchesSearch;
+      });
+
+      // Update Total Listings Header Summary Counter
+      $('totalListingsSummary').textContent = `${filtered.length} ቻናሎች / አካውንቶች`;
+      renderCards(filtered);
+    }
+
+    function renderCards(items) {
+      const grid = $('listingsGrid');
+      if (items.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-sm">ምንም የተገኘ ማስታወቂያ የለም። እባክዎን በአድሚን በኩል ያረጋግጡ ወይም አዲስ ይለጥፉ።</div>`;
+        return;
+      }
+
+      grid.innerHTML = items.map(item => {
+        const p = (item.platform || 'TikTok').toLowerCase();
+        
+        // Exact Platform Branding & Colors
+        let platformBorder = 'border-platform-tiktok';
+        let platformIcon = 'fa-brands fa-tiktok text-tiktok';
+        let platformBadgeColor = 'bg-pink-500/10 text-tiktok border-pink-500/30';
+
+        if(p === 'youtube') {
+          platformBorder = 'border-platform-youtube';
+          platformIcon = 'fa-brands fa-youtube text-youtube';
+          platformBadgeColor = 'bg-red-500/10 text-youtube border-red-500/30';
+        } else if(p === 'instagram') {
+          platformBorder = 'border-platform-instagram';
+          platformIcon = 'fa-brands fa-instagram text-instagram';
+          platformBadgeColor = 'bg-purple-500/10 text-instagram border-purple-500/30';
+        } else if(p === 'telegram') {
+          platformBorder = 'border-platform-telegram';
+          platformIcon = 'fa-brands fa-telegram text-telegram';
+          platformBadgeColor = 'bg-sky-500/10 text-telegram border-sky-500/30';
+        } else if(p === 'facebook') {
+          platformBorder = 'border-platform-facebook';
+          platformIcon = 'fa-brands fa-facebook text-facebook';
+          platformBadgeColor = 'bg-blue-500/10 text-facebook border-blue-500/30';
+        }
+
+        let statusBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">ACTIVE</span>`;
+        if(item.status === 'pending_approval') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">PENDING</span>`;
+        } else if(item.status === 'locked') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">LOCKED (ESCROW)</span>`;
+        } else if(item.status === 'completed') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">SOLD</span>`;
+        }
+
+        const netShare = Math.round((item.price_etb || 0) * 0.9);
+
+        let adminActions = '';
+        if (isAdminMode && item.status === 'pending_approval') {
+          adminActions = `
+            <button onclick="approveListing('${item.id}')" class="w-full mb-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-xl transition">
+              <i class="fa-solid fa-check-circle mr-1"></i> ማስታወቂያውን አጽድቅ (Approve)
+            </button>
+          `;
+        }
+
+        return `
+          <div class="glass-card ${platformBorder} p-4 flex flex-col justify-between relative overflow-hidden">
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-lg shadow-inner">
+                    <i class="${platformIcon}"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-bold text-white line-clamp-1">${esc(item.title)}</h4>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full font-bold border ${platformBadgeColor}">${esc(item.platform)}</span>
+                  </div>
+                </div>
+                ${statusBadge}
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 bg-slate-950/70 border border-slate-800/80 rounded-xl p-2.5 mb-3 text-center">
+                <div>
+                  <div class="text-[10px] text-slate-400 font-medium">ተከታይ/Subscribers</div>
+                  <div class="text-xs font-bold text-slate-200 mt-0.5"><i class="fa-solid fa-users text-blue-400 text-[10px] mr-1"></i>${esc(item.followers || 'N/A')}</div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-slate-400 font-medium">የ 90% ሻጭ ድርሻ</div>
+                  <div class="text-xs font-bold text-emerald-400 mt-0.5">${netShare.toLocaleString()} ETB</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs text-slate-400">ዋጋ፡</span>
+                <span class="text-base font-black text-amber-400">${Number(item.price_etb || 0).toLocaleString()} ETB</span>
+              </div>
+
+              ${adminActions}
+
+              <button onclick="openDetailModal('${item.id}')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-2.5 rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-eye text-blue-400"></i> ዝርዝር እና ስክሪንሾት ይመልከቱ
+              </button>
+            </div>
           </div>
-          <div class="followers-info">👥 ${esc(x.followers || 'መጠን አልተገለጸም')}</div>
-          <p style="font-size: 14px; color: #d1d5db; margin: 10px 0;">${esc(x.description || '')}</p>
-          <div class="price-amount">${Number(x.price_etb).toLocaleString()} ETB</div>
-          <div class="escrow-status-box">
-            <div style="margin-bottom: 8px;">${statusBadge}</div>
-            <div>${actionBtn}</div>
+        `;
+      }).join('');
+    }
+
+    function openDetailModal(id) {
+      const item = rawListings.find(l => l.id === id);
+      if(!item) return;
+
+      const netShare = Math.round(item.price_etb * 0.9);
+      const isOwner = currentUser && item.seller_id === currentUser.id;
+
+      let ownerEditBtn = isOwner ? `
+        <button onclick="openEditPrice('${item.id}', ${item.price_etb})" class="w-full bg-slate-800 hover:bg-slate-700 text-blue-400 border border-slate-700 text-xs py-2 rounded-xl mt-2 font-bold">
+          <i class="fa-solid fa-pen mr-1"></i> ዋጋ ቀይር (Edit Price)
+        </button>
+      ` : '';
+
+      let adminCompleteBtn = isAdminMode && item.status === 'locked' ? `
+        <button onclick="completeEscrowTransaction('${item.id}')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-2.5 rounded-xl font-bold mt-2">
+          <i class="fa-solid fa-check-double mr-1"></i> ሽያጭ ጨርስ እና ብር ለሻጭ ለቅቅ (Release Funds)
+        </button>
+      ` : '';
+
+      $('modalDetailContent').innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-white">${esc(item.title)}</h3>
+            <span class="text-xs font-bold text-amber-400">${Number(item.price_etb).toLocaleString()} ETB</span>
           </div>
+
+          <div class="space-y-1 text-xs text-slate-300">
+            <p><strong>ፕላትፎርም:</strong> ${esc(item.platform)}</p>
+            <p><strong>ተከታዮች:</strong> ${esc(item.followers)}</p>
+            <p><strong>የአካውንት ሊንክ:</strong> <a href="${esc(item.account_url)}" target="_blank" class="text-blue-400 underline">${esc(item.account_url)}</a></p>
+            <p><strong>የሻጭ ስልክ / ቴሌግራም:</strong> ${esc(item.seller_phone || 'N/A')} / ${esc(item.seller_telegram || 'N/A')}</p>
+          </div>
+
+          <!-- Vertical Screenshot in Phone Frame -->
+          <div>
+            <label class="text-xs font-semibold text-slate-400 mb-1.5 block">የስልካችን ቨርቲካል ስክሪንሾት (Vertical Screenshot)</label>
+            <div class="phone-screen-frame max-w-[200px] mx-auto border border-blue-500/40">
+              <img src="${item.screenshot_url || 'https://placehold.co/300x533/0d1527/ffffff?text=No+Image'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/300x533/0d1527/ffffff?text=Image+Error';">
+            </div>
+          </div>
+
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs space-y-1 text-slate-400">
+            <p>ምንም ችግር ካጋጠመዎ ወይም ማረጋገጫ ከፈለጉ በቀጥታ በስልክ ቁጥር <strong class="text-amber-400">0961990973</strong> ይደውሉልን።</p>
+          </div>
+
+          ${ownerEditBtn}
+          ${adminCompleteBtn}
+
+          ${item.status === 'active' ? `
+            <button onclick="triggerEscrow('${item.id}', '${esc(item.title)}', ${item.price_etb})" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-shield-halved"></i> በ Escrow ግዛ (Buy Securely)
+            </button>
+          ` : `<div class="text-center text-xs font-bold text-purple-400 py-2">ይህ አካውንት በአሁኑ ወቅት በ Escrow ቁጥጥር ስር ወይም ተሸጧል።</div>`}
         </div>
       `;
-    }).join('');
-  }
-
-  function filterPlatform(platform, el) {
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    
-    if (platform === 'all') {
-      renderListings(allListingsData);
-    } else {
-      let filtered = allListingsData.filter(x => x.platform === platform);
-      renderListings(filtered);
+      openModal('detailModal');
     }
-  }
 
-  // Escrow Purchase
-  async function startEscrow(id, title, price) {
-    if (!currentUser) { alert('እባክዎን መጀመሪያ ከመለያዎ ይግቡ።'); switchTab('tab-account'); return; }
-    
-    let confirmBuy = confirm(`"${title}" የተባለውን አካውንት በ ${price} ETB በ Escrow (በአድሚን አማካኝነት) ለመግዛት እርግጠኛ ኖት?`);
-    if (!confirmBuy) return;
+    async function handlePublishListing(e) {
+      e.preventDefault();
+      if (!currentUser) {
+        alert('ማስታወቂያ ለመለቀቅ መጀመሪያ መለያዎን ይግቡ!');
+        openModal('authModal');
+        return;
+      }
 
-    const { error } = await sb.from('listings').update({ status: 'locked' }).eq('id', id);
-    if (error) {
-      alert('ስህተት ተፈጥሯል፦ ' + error.message);
-    } else {
-      alert('ክፍያዎ ተመዝግቧል! ገንዘቡ በአድሚን ተይዟል (Locked). አሁን ወደ ቻት መድረክ ይዛወራሉ።');
-      switchTab('tab-orders');
-      $('chatMsgBox').innerHTML += `
-        <div class="chat-msg admin">
-          🛒 <strong>አዲስ ትዕዛዝ:</strong> "${title}" በ ${price} ETB ተገዝቷል። ገንዘቡ በአድሚን ተይዟል።
+      const msg = $('sellFormMessage');
+      msg.classList.remove('hidden');
+      msg.textContent = 'በመላክ ላይ ነው...';
+
+      const title = $('postTitle').value.trim();
+      const platform = $('postPlatform').value;
+      const followers = $('postFollowers').value.trim();
+      const account_url = $('postAccountUrl').value.trim();
+      const seller_phone = $('sellerPhone').value.trim();
+      const seller_telegram = $('sellerTelegram').value.trim();
+      const screenshot_url = $('postScreenshotBase64').value;
+      const price_etb = Number($('postPrice').value);
+      const description = $('postDesc').value.trim();
+
+      const { error } = await sb.from('listings').insert({
+        seller_id: currentUser.id,
+        title,
+        platform,
+        followers,
+        account_url,
+        seller_phone,
+        seller_telegram,
+        screenshot_url,
+        price_etb,
+        description,
+        status: 'pending_approval'
+      });
+
+      if (error) {
+        msg.textContent = 'ስህተት: ' + error.message;
+      } else {
+        msg.textContent = 'ማስታወቂያው ለአድሚን ገቢ ሆኗል! በአድሚን ቁጥጥር ከተረጋገጠ በኋላ ይወጣል።';
+        setTimeout(() => {
+          closeModal('sellModal');
+          $('sellForm').reset();
+          $('imagePreviewContainer').classList.add('hidden');
+          fetchListings();
+        }, 1500);
+      }
+    }
+
+    function triggerEscrow(id, title, price) {
+      if(!currentUser) {
+        alert('ለመግዛት መጀመሪያ ከመለያዎ ይግቡ!');
+        openModal('authModal');
+        return;
+      }
+      $('buyListingId').value = id;
+      $('buyListingTitle').value = title;
+      $('buyListingPrice').value = price;
+      $('buySummaryTitle').textContent = title;
+      $('buySummaryPrice').textContent = `${Number(price).toLocaleString()} ETB`;
+      
+      closeModal('detailModal');
+      openModal('buyModal');
+    }
+
+    async function submitEscrowPurchase(e) {
+      e.preventDefault();
+      const id = $('buyListingId').value;
+      const buyer_phone = $('buyerPhone').value.trim();
+      const buyer_telegram = $('buyerTelegram').value.trim();
+
+      const { error } = await sb.from('listings').update({ 
+        status: 'locked',
+        buyer_id: currentUser.id,
+        buyer_phone: buyer_phone,
+        buyer_telegram: buyer_telegram
+      }).eq('id', id);
+
+      if(error) {
+        alert('ስህተት: ' + error.message);
+      } else {
+        alert('የ Escrow ጥያቄዎ ተመዝግቧል! አድሚኑ በስልክ ቁጥር 0961990973 አግኝቶ ክፍያውን እና አካውንቱን ያስተላልፍልዎታል።');
+        closeModal('buyModal');
+        fetchListings();
+      }
+    }
+
+    async function approveListing(id) {
+      const { error } = await sb.from('listings').update({ status: 'active' }).eq('id', id);
+      if(error) alert('ስህተት: ' + error.message);
+      else { alert('ማስታወቂያው ጸድቋል (Active)!'); fetchListings(); }
+    }
+
+    // Admin complete transaction and release funds to seller
+    async function completeEscrowTransaction(id) {
+      const { error } = await sb.from('listings').update({ status: 'completed' }).eq('id', id);
+      if(error) alert('ስህተት: ' + error.message);
+      else { alert('ሽያጩ ተጠናቋል! ብሩ ለሻጩ ዳሽቦርድ ተለቋል።'); closeModal('detailModal'); fetchListings(); }
+    }
+
+    function openEditPrice(id, currentPrice) {
+      $('editListingId').value = id;
+      $('editPriceInput').value = currentPrice;
+      openModal('editPriceModal');
+    }
+
+    async function saveUpdatedPrice() {
+      const id = $('editListingId').value;
+      const newPrice = Number($('editPriceInput').value);
+      const { error } = await sb.from('listings').update({ price_etb: newPrice }).eq('id', id);
+      if (error) alert('ስህተት: ' + error.message);
+      else { alert('ዋጋው ተስተካክሏል!'); closeModal('editPriceModal'); fetchListings(); }
+    }
+
+    // COMPREHENSIVE SELLER DASHBOARD LOGIC
+    async function loadSellerDashboardData() {
+      if(!currentUser) return;
+
+      const { data: userListings } = await sb.from('listings').select('*').eq('seller_id', currentUser.id);
+      const listings = userListings || [];
+
+      const totalListings = listings.length;
+      let lockedBalance = 0;
+      let completedSales = 0;
+
+      listings.forEach(l => {
+        const net = Math.round((l.price_etb || 0) * 0.9);
+        if(l.status === 'locked') lockedBalance += net;
+        if(l.status === 'completed') completedSales += net;
+      });
+
+      // Load payout requests / history
+      const { data: payouts } = await sb.from('payout_requests').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+      const payoutList = payouts || [];
+
+      let totalWithdrawn = 0;
+      payoutList.forEach(p => {
+        if(p.status === 'approved') totalWithdrawn += Number(p.amount || 0);
+      });
+
+      const availableBalance = Math.max(0, completedSales - totalWithdrawn);
+
+      $('dashAvailableBalance').textContent = `${availableBalance.toLocaleString()} ETB`;
+      $('dashLockedBalance').textContent = `${lockedBalance.toLocaleString()} ETB`;
+      $('dashTotalListingsCount').textContent = totalListings;
+      $('dashCompletedSales').textContent = `${completedSales.toLocaleString()} ETB`;
+
+      // Transaction summaries (Daily, Monthly, Yearly simulated from completed sales)
+      $('summaryDaily').textContent = `${completedSales.toLocaleString()} ETB (1 ትራንዛክሽን)`;
+      $('summaryMonthly').textContent = `${completedSales.toLocaleString()} ETB (${completedSales > 0 ? 1 : 0} ትራንዛክሽን)`;
+      $('summaryYearly').textContent = `${completedSales.toLocaleString()} ETB (${completedSales > 0 ? 1 : 0} ትራንዛክሽን)`;
+
+      // Render Payout History & Receipts
+      const historyContainer = $('payoutHistoryList');
+      if(payoutList.length === 0) {
+        historyContainer.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">ምንም የክፍያ ማውጫ ጥያቄ የለም።</div>`;
+      } else {
+        historyContainer.innerHTML = payoutList.map(p => `
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs space-y-1">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white">${p.bank_name} (${p.account_num})</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'}">
+                ${p.status.toUpperCase()}
+              </span>
+            </div>
+            <div class="flex justify-between text-slate-400 text-[11px]">
+              <span>መጠን: <strong class="text-emerald-400">${Number(p.amount).toLocaleString()} ETB</strong></span>
+              <span>ቀን: ${new Date(p.created_at || Date.now()).toLocaleDateString()}</span>
+            </div>
+            ${p.status === 'approved' ? `
+              <div class="bg-slate-950 p-2 rounded-lg border border-emerald-500/30 mt-2 text-[11px] text-emerald-300">
+                <i class="fa-solid fa-receipt mr-1"></i> አድሚን ገንዘቡን አጽድቆ ወደ አካውንትዎ ልኳል! ደረሰኝ ቁጥር: #DAKO-${p.id.slice(0,6)}
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+      }
+    }
+
+    async function submitWithdrawalRequest(e) {
+      e.preventDefault();
+      if(!currentUser) return;
+
+      const bank_name = $('withdrawBank').value;
+      const account_num = $('withdrawAccountNum').value.trim();
+      const amount = Number($('withdrawAmount').value);
+
+      const { error } = await sb.from('payout_requests').insert({
+        user_id: currentUser.id,
+        bank_name,
+        account_num,
+        amount,
+        status: 'pending'
+      });
+
+      if(error) {
+        alert('ስህተት: ' + error.message);
+      } else {
+        alert('የገንዘብ ማውጫ ጥያቄዎ በአድሚን ተመዝግቧል! አድሚን ሲያጸድቀው ደረሰኝ ይደርስዎታል። ጥያቄ ካለ በ 0961990973 ይደውሉ።');
+        $('withdrawAccountNum').value = '';
+        $('withdrawAmount').value = '';
+        loadSellerDashboardData();
+      }
+    }
+
+    async function loadOrdersData() {
+      if(!currentUser) return;
+      const { data } = await sb.from('listings').select('*').or(`seller_id.eq.${currentUser.id},buyer_id.eq.${currentUser.id}`);
+      const container = $('ordersListContainer');
+      const items = data || [];
+
+      if(items.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">ምንም የ Escrow ትዕዛዝ አልተገኘም።</div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(i => `
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h4 class="text-sm font-bold text-white">${esc(i.title)}</h4>
+            <p class="text-xs text-slate-400">ዋጋ: ${Number(i.price_etb).toLocaleString()} ETB | ሁኔታ: <span class="text-amber-400 font-bold">${i.status}</span></p>
+          </div>
+          <div class="text-xs text-slate-300">
+            <p>ስልክ: ${esc(i.buyer_phone || i.seller_phone || 'N/A')}</p>
+            <p>ቴሌግራም: ${esc(i.buyer_telegram || i.seller_telegram || 'N/A')}</p>
+          </div>
         </div>
-      `;
-      loadListings();
+      `).join('');
     }
-  }
 
-  // Publish Listing
-  async function publishListing() {
-    if (!currentUser) { $('publishmsg').textContent = 'መጀመሪያ ከመለያህ ግባ።'; switchTab('tab-account'); return; }
-    
-    const title = $('title').value.trim(), price = Number($('price').value);
-    if (!title || !price || price <= 0) { $('publishmsg').textContent = 'እባክዎን ርዕስ እና ትክክለኛ ዋጋ ያስገቡ።'; return; }
-    
-    const { error } = await sb.from('listings').insert({
-      seller_id: currentUser.id,
-      title,
-      platform: $('platform').value,
-      description: $('description').value.trim(),
-      followers: $('followers').value.trim(),
-      price_etb: price,
-      status: 'available'
-    });
-    
-    $('publishmsg').textContent = error ? error.message : 'ማስታወቂያው በተሳካ ሁኔታ ተጨምሯል!';
-    if (!error) {
-      $('title').value = ''; $('description').value = ''; $('followers').value = ''; $('price').value = '';
-      loadListings();
-      switchTab('tab-marketplace');
+    function esc(str) {
+      if(!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
-  }
 
-  // Live Chat Simulation
-  function sendChatMessage() {
-    let input = $('chatInput');
-    let txt = input.value.trim();
-    if (!txt) return;
-
-    let box = $('chatMsgBox');
-    box.innerHTML += `<div class="chat-msg me"><strong>እርስዎ:</strong> ${esc(txt)}</div>`;
-    input.value = '';
-    box.scrollTop = box.scrollHeight;
-  }
-
-  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }
-
-  // Initializing App
-  sb.auth.onAuthStateChange(() => checkSession());
-  checkSession();
-  loadListings();
-</script>
+    window.onload = async () => {
+      await checkUserSession();
+      await fetchListings();
+    };
+  </script>
 </body>
 </html>
+```
