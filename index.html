@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAKO MARKET - Ultimate Escrow Marketplace</title>
+    <title>DAKO MARKET - Escrow Marketplace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -28,260 +28,128 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <a href="tel:0961990973" class="flex items-center gap-1 bg-gray-800 hover:bg-gray-700 text-xs text-green-400 px-3 py-1.5 rounded-full border border-gray-700">
+            <a href="tel:0961990973" class="flex items-center gap-1 bg-gray-800 text-xs text-green-400 px-3 py-1.5 rounded-full border border-gray-700">
                 <i class="fa-solid fa-phone"></i> <span>0961990973</span>
             </a>
-            <button onclick="toggleAdminView()" id="adminToggleBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs px-3 py-1.5 rounded-lg border border-gray-700">
-                <i class="fa-solid fa-user-gear"></i> Admin
-            </button>
+            <button onclick="toggleAdmin()" id="adminBtn" class="bg-gray-800 text-gray-300 text-xs px-3 py-1.5 rounded-lg border border-gray-700">Admin</button>
         </div>
     </header>
 
-    <!-- Main Marketplace View -->
-    <main id="marketView" class="max-w-md mx-auto px-4 py-4 space-y-4">
-        <!-- Banner -->
-        <div class="glass p-4 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-950/40 to-transparent">
-            <div class="flex items-center justify-between text-xs text-blue-400 font-semibold mb-1">
-                <span><i class="fa-solid fa-shield-halved"></i> 100% በሰው Escrow የተጠበቀ ንግድ</span>
+    <!-- Main Content -->
+    <main class="max-w-md mx-auto px-4 py-4 space-y-4">
+        
+        <!-- Market View -->
+        <div id="marketSection" class="space-y-4">
+            <!-- Banner -->
+            <div class="glass p-4 rounded-2xl border border-blue-500/20">
+                <div class="text-xs text-blue-400 font-semibold mb-1"><i class="fa-solid fa-shield-halved"></i> 100% በሰዎች Escrow የተጠበቀ</div>
+                <p class="text-sm text-gray-200">የሶሻል ሚዲያ አካውንቶችን በደህና ይግዙ ወይም ይሸጡ!</p>
             </div>
-            <p class="text-sm font-medium text-gray-200">የሶሻል ሚዲያ አካውንቶችን ያለምንም ስጋት በደህና ይግዙ ወይም ይሸጡ!</p>
-        </div>
 
-        <!-- Total Stats Counter -->
-        <div class="glass p-3 rounded-xl flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400"><i class="fa-solid fa-store"></i></div>
-                <div>
-                    <p class="text-[11px] text-gray-400">አጠቃላይ ለሽያጭ የቀረቡ አካውንቶች</p>
-                    <p id="totalListingsCount" class="text-base font-bold text-white">0 አካውንቶች</p>
+            <!-- Stats -->
+            <div class="glass p-3 rounded-xl flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400"><i class="fa-solid fa-store"></i></div>
+                    <div>
+                        <p class="text-[11px] text-gray-400">አጠቃላይ አካውንቶች</p>
+                        <p id="totalCount" class="text-base font-bold text-white">2 አካውንቶች</p>
+                    </div>
                 </div>
             </div>
-            <button onclick="renderListings('all')" class="text-gray-400 hover:text-white p-2"><i class="fa-solid fa-rotate-right"></i></button>
+
+            <!-- Filters -->
+            <div class="flex gap-2 overflow-x-auto pb-1 text-xs">
+                <button onclick="filterList('all')" class="bg-blue-600 text-white px-4 py-2 rounded-xl whitespace-nowrap">ሁሉም</button>
+                <button onclick="filterList('TikTok')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap">TikTok</button>
+                <button onclick="filterList('YouTube')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap">YouTube</button>
+            </div>
+
+            <!-- Listings -->
+            <div id="listingsDiv" class="space-y-3"></div>
         </div>
 
-        <!-- Filter Buttons -->
-        <div class="flex gap-2 overflow-x-auto pb-1 text-xs">
-            <button onclick="renderListings('all')" class="bg-blue-600 text-white px-4 py-2 rounded-xl whitespace-nowrap">ሁሉም</button>
-            <button onclick="renderListings('TikTok')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-tiktok text-pink-500"></i> TikTok</button>
-            <button onclick="renderListings('YouTube')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-youtube text-red-500"></i> YouTube</button>
-            <button onclick="renderListings('Telegram')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-telegram text-sky-400"></i> Telegram</button>
-            <button onclick="renderListings('Instagram')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-instagram text-purple-400"></i> Instagram</button>
-        </div>
-
-        <!-- Listings Container -->
-        <div id="listingsContainer" class="space-y-3"></div>
-
-        <!-- Admin Pending Orders Approval Section -->
-        <div id="adminOrdersSection" class="hidden glass p-4 rounded-2xl border border-amber-500/30 space-y-3">
-            <h3 class="font-bold text-amber-400 text-sm flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i> ያልጸደቁ የክፍያ ማመልከቻዎች (Admin Only)</h3>
-            <div id="pendingOrdersList" class="space-y-3 text-xs">
-                <p class="text-gray-400 text-center">ምንም የሚጠበቅ ማመልከቻ የለም።</p>
+        <!-- Dashboard View -->
+        <div id="dashboardSection" class="space-y-4 hidden">
+            <div class="glass p-4 rounded-2xl space-y-3">
+                <h3 class="font-bold text-white text-base"><i class="fa-solid fa-chart-pie text-blue-400"></i> የሻጭ ዳሽቦርድ</h3>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="bg-gray-900 p-3 rounded-xl border border-gray-800">
+                        <p class="text-gray-400 text-[10px]">የተቆለፈበት ብር (Escrow)</p>
+                        <p class="text-base font-bold text-amber-400 mt-1">4,050 ETB</p>
+                    </div>
+                    <div class="bg-gray-900 p-3 rounded-xl border border-gray-800">
+                        <p class="text-gray-400 text-[10px]">የተለቀቀ ብር</p>
+                        <p class="text-base font-bold text-green-400 mt-1">8,100 ETB</p>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-gray-800 space-y-2">
+                    <p class="text-xs font-bold text-white">ብር ማውጫ ማመልከቻ</p>
+                    <select id="bankName" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white">
+                        <option>Telebirr</option>
+                        <option>CBE Birr</option>
+                    </select>
+                    <input type="text" id="accNumber" placeholder="የሂሳብ/ስልክ ቁጥር" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white">
+                    <button onclick="withdrawMoney()" class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl text-xs">ማመልከቻ ላክ</button>
+                </div>
             </div>
         </div>
+
     </main>
 
-    <!-- Seller Dashboard View (Hidden by default, opened via bottom tab) -->
-    <main id="dashboardView" class="max-w-md mx-auto px-4 py-4 space-y-4 hidden">
-        <div class="glass p-4 rounded-2xl space-y-3">
-            <h3 class="font-bold text-white text-base flex items-center gap-2"><i class="fa-solid fa-chart-pie text-blue-400"></i> የሻጭ ዳሽቦርድ (Seller Dashboard)</h3>
-            <div class="grid grid-cols-2 gap-3 text-xs">
-                <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800">
-                    <p class="text-gray-400 text-[10px]">የተለጠፉ አካውንቶች</p>
-                    <p id="dashTotalListings" class="text-lg font-bold text-white mt-1">1</p>
-                </div>
-                <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800">
-                    <p class="text-gray-400 text-[10px]">የተቆለፈበት ብር (Escrow)</p>
-                    <p id="dashEscrowMoney" class="text-lg font-bold text-amber-400 mt-1">4,050 ETB</p>
-                </div>
-                <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800">
-                    <p class="text-gray-400 text-[10px]">የገባ/የተለቀቀ ብር</p>
-                    <p id="dashAvailableMoney" class="text-lg font-bold text-green-400 mt-1">8,100 ETB</p>
-                </div>
-                <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800">
-                    <p class="text-gray-400 text-[10px]">ጠቅላላ ገቢ</p>
-                    <p class="text-lg font-bold text-teal-400 mt-1">12,150 ETB</p>
-                </div>
-            </div>
-
-            <!-- Withdrawal Form -->
-            <div class="pt-3 border-t border-gray-800 space-y-3">
-                <p class="text-xs font-bold text-white">ብር ወደ ባንክ ማውጫ ማመልከቻ</p>
-                <select id="bankChoice" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white">
-                    <option value="Telebirr">Telebirr</option>
-                    <option value="CBE Birr">CBE Birr (Commercial Bank)</option>
-                </select>
-                <input type="text" id="withdrawAccount" placeholder="የባንክ/ቴሌብራ የሂሳብ ቁጥር (Account/Phone)" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white">
-                <input type="number" id="withdrawAmount" placeholder="የሚያወጡት የብር መጠን (ETB)" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white">
-                <button onclick="requestWithdrawal()" class="w-full bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold py-2.5 rounded-xl text-xs shadow-lg">
-                    የብር ማውጫ ማመልከቻ ላክ
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <!-- Buy / Payment Checkout Modal -->
+    <!-- Buy Modal -->
     <div id="buyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="glass p-5 rounded-2xl max-w-sm w-full space-y-4 border border-gray-700 max-h-[90vh] overflow-y-auto">
+        <div class="glass p-5 rounded-2xl max-w-sm w-full space-y-4 border border-gray-700">
             <div class="flex justify-between items-center border-b border-gray-800 pb-2">
-                <h3 class="font-bold text-white text-sm">የ Escrow ክፍያ መፈጸሚያ</h3>
-                <button onclick="closeModal('buyModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 class="font-bold text-white text-sm">የ Escrow ክፍያ</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p id="modalPriceText" class="text-amber-400 font-extrabold text-sm"></p>
+            
+            <div class="bg-gray-900 p-3 rounded-xl text-xs space-y-1 border border-gray-800">
+                <p class="text-sky-400 font-bold">Telebirr: 0961990973 (Addisu)</p>
+                <p class="text-purple-400 font-bold">CBE: 0912122880 (Balemlay)</p>
             </div>
 
-            <div class="bg-blue-950/40 p-3 rounded-xl border border-blue-800/40 flex justify-between items-center">
-                <span class="text-xs text-gray-300">የሚከፈለው ጠቅላላ ዋጋ:</span>
-                <span id="modalPrice" class="text-base font-extrabold text-amber-400">0 ETB</span>
-            </div>
-
-            <div class="space-y-2">
-                <p class="text-xs text-gray-300 font-semibold">1. ከታች ባሉት አማራጮች ክፍያ ይፈጽሙ፦</p>
-                <div class="bg-gray-900/90 p-3 rounded-xl border border-gray-800 flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] text-sky-400 font-bold">Telebirr Account</p>
-                        <p class="text-xs font-bold text-white">0961990973</p>
-                        <p class="text-[10px] text-gray-400">Addisu Dereje</p>
-                    </div>
-                    <button onclick="copyToClipboard('0961990973')" class="bg-sky-600/20 text-sky-400 text-xs px-3 py-1.5 rounded-lg border border-sky-500/30">Copy</button>
-                </div>
-                <div class="bg-gray-900/90 p-3 rounded-xl border border-gray-800 flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] text-purple-400 font-bold">CBE Birr Account</p>
-                        <p class="text-xs font-bold text-white">0912122880</p>
-                        <p class="text-[10px] text-gray-400">Balemlay Dereje</p>
-                    </div>
-                    <button onclick="copyToClipboard('0912122880')" class="bg-purple-600/20 text-purple-400 text-xs px-3 py-1.5 rounded-lg border border-purple-500/30">Copy</button>
-                </div>
-            </div>
-
-            <div class="space-y-2 pt-2 border-t border-gray-800">
-                <p class="text-xs text-gray-300 font-semibold">2. መረጃዎን እና የክፍያ ደረሰኝ ያስገቡ፦</p>
-                <input type="text" id="buyerPhone" placeholder="የስልክ ቁጥርዎ" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white">
-                <input type="text" id="buyerTelegram" placeholder="የቴሌግራም አድራሻ (@username)" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white">
-                <div>
-                    <label class="block text-[10px] text-gray-400 mb-1">የክፍያ ደረሰኝ/Screenshot ፎቶ ይጫኑ፦</label>
-                    <input type="file" id="receiptUpload" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-blue-600 file:text-white cursor-pointer">
-                </div>
-            </div>
-
-            <button onclick="submitBuyRequest()" class="w-full bg-gradient-to-r from-green-600 to-emerald-500 font-bold text-white py-3 rounded-xl text-xs shadow-lg">
-                ክፍያውን ለAdmin አረጋግጥ
-            </button>
+            <input type="text" id="buyerPhone" placeholder="ስልክ ቁጥርዎ" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white">
+            <input type="file" id="receipt" class="w-full text-xs text-gray-400 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white">
+            
+            <button onclick="confirmBuy()" class="w-full bg-green-600 text-white font-bold py-2.5 rounded-xl text-xs">ክፍያ ላክ</button>
         </div>
     </div>
 
-    <!-- Bottom Navigation Bar -->
+    <!-- Bottom Nav -->
     <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 py-2 px-6 flex justify-between items-center z-40 max-w-md mx-auto">
-        <button onclick="switchTab('market')" id="navMarket" class="flex flex-col items-center gap-1 text-blue-400">
-            <i class="fa-solid fa-shop text-lg"></i>
-            <span class="text-[10px]">ገበያ</span>
+        <button onclick="showTab('market')" id="tabMarket" class="flex flex-col items-center gap-1 text-blue-400">
+            <i class="fa-solid fa-shop text-lg"></i><span class="text-[10px]">ገበያ</span>
         </button>
-        <button onclick="switchTab('dashboard')" id="navDashboard" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
-            <i class="fa-solid fa-chart-pie text-lg"></i>
-            <span class="text-[10px]">ዳሽቦርድ</span>
+        <button onclick="showTab('dashboard')" id="tabDash" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+            <i class="fa-solid fa-chart-pie text-lg"></i><span class="text-[10px]">ዳሽቦርድ</span>
         </button>
-        <button onclick="alert('አካውንት ለመለቀቅ በስልክ 0961990973 ያግኙን')" class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white shadow-lg -mt-6">
+        <button onclick="alert('አካውንት ለመለጠፍ በ 0961990973 ይደውሉ')" class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-lg -mt-6">
             <i class="fa-solid fa-plus text-xl"></i>
         </button>
         <button onclick="window.location.href='tel:0961990973'" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
-            <i class="fa-solid fa-phone text-lg"></i>
-            <span class="text-[10px]">ደውል</span>
+            <i class="fa-solid fa-phone text-lg"></i><span class="text-[10px]">ደውል</span>
         </button>
-        <button onclick="toggleAdminView()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
-            <i class="fa-solid fa-user-shield text-lg"></i>
-            <span class="text-[10px]">Admin</span>
+        <button onclick="toggleAdmin()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+            <i class="fa-solid fa-user-shield text-lg"></i><span class="text-[10px]">Admin</span>
         </button>
     </nav>
 
     <script>
         let isAdmin = false;
-        let selectedItem = null;
-
-        const sampleListings = [
-            { id: 1, title: "Addise news", platform: "YouTube", subscribers: "22,000", price: 9000, sellerShare: 8100, status: "ACTIVE" },
-            { id: 2, title: "1000tiktok", platform: "TikTok", subscribers: "15,000", price: 4500, sellerShare: 4050, status: "ACTIVE" }
+        const listings = [
+            { id: 1, title: "Addise news", platform: "YouTube", subs: "22,000", price: 9000, share: 8100 },
+            { id: 2, title: "1000tiktok", platform: "TikTok", subs: "15,000", price: 4500, share: 4050 }
         ];
 
-        let pendingOrders = [];
-
         function renderListings(filter) {
-            switchTab('market');
-            const container = document.getElementById('listingsContainer');
-            const items = filter === 'all' ? sampleListings : sampleListings.filter(i => i.platform === filter);
-            document.getElementById('totalListingsCount').innerText = `${items.length} አካውንቶች`;
-
+            const container = document.getElementById('listingsDiv');
+            const items = filter === 'all' ? listings : listings.filter(i => i.platform === filter);
+            
             container.innerHTML = items.map(item => `
                 <div class="glass p-4 rounded-2xl space-y-3 platform-${item.platform.toLowerCase()}">
                     <div class="flex justify-between items-start">
                         <div>
                             <span class="text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">${item.platform}</span>
-                            <h3 class="font-bold text-base text-white mt-1">${item.title}</h3>
-                        </div>
-                        <span class="text-[10px] text-green-400 font-semibold bg-green-500/10 px-2 py-1 rounded-lg">${item.status}</span>
-                    </div>
-                    
-                    <div class="flex justify-between items-center text-xs text-gray-300">
-                        <span>ተከታይ/Subscribers: <strong>${item.subscribers}</strong></span>
-                        ${isAdmin ? `<span class="text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded">90% ሻጭ: ${item.sellerShare.toLocaleString()} ETB</span>` : ''}
-                    </div>
-
-                    <div class="flex justify-between items-center pt-2 border-t border-gray-800">
-                        <div>
-                            <p class="text-[10px] text-gray-400">ዋጋ</p>
-                            <p class="text-base font-extrabold text-amber-400">${item.price.toLocaleString()} ETB</p>
-                        </div>
-                        <button onclick="openBuyModal(${item.id})" class="bg-gradient-to-r from-blue-600 to-teal-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg">
-                            <i class="fa-solid fa-cart-shopping"></i> Buy
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function switchTab(tab) {
-            const marketView = document.getElementById('marketView');
-            const dashboardView = document.getElementById('dashboardView');
-            const navMarket = document.getElementById('navMarket');
-            const navDashboard = document.getElementById('navDashboard');
-
-            if(tab === 'market') {
-                marketView.classList.remove('hidden');
-                dashboardView.classList.add('hidden');
-                navMarket.className = "flex flex-col items-center gap-1 text-blue-400";
-                navDashboard.className = "flex flex-col items-center gap-1 text-gray-400 hover:text-white";
-            } else if(tab === 'dashboard') {
-                marketView.classList.add('hidden');
-                dashboardView.classList.remove('hidden');
-                navDashboard.className = "flex flex-col items-center gap-1 text-blue-400";
-                navMarket.className = "flex flex-col items-center gap-1 text-gray-400 hover:text-white";
-            }
-        }
-
-        function toggleAdminView() {
-            isAdmin = !isAdmin;
-            const adminSec = document.getElementById('adminOrdersSection');
-            const btn = document.getElementById('adminToggleBtn');
-            if(isAdmin) {
-                adminSec.classList.remove('hidden');
-                btn.classList.add('bg-amber-600', 'text-white');
-                alert('Admin Mode በርቷል!');
-            } else {
-                adminSec.classList.add('hidden');
-                btn.classList.remove('bg-amber-600', 'text-white');
-            }
-            renderListings('all');
-            renderPendingOrders();
-        }
-
-        function openBuyModal(id) {
-            selectedItem = sampleListings.find(i => i.id === id);
-            document.getElementById('modalPrice').innerText = `${selectedItem.price.toLocaleString()} ETB`;
-            openModal('buyModal');
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text);
-            alert(`የአካውንት ቁጥር ${text} ኮፒ ተደርጓል!`);
-        }
-
-        function submitBuyRequest() {
-            const phone = document.getElementById('buyerPhone').value;
-            const receipt = document.
+                            <h3 class="font-bold text
