@@ -8,7 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b0f19; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
-        .glass { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
         .platform-tiktok { border-left: 4px solid #ff0050; }
         .platform-youtube { border-left: 4px solid #ff0000; }
         .platform-instagram { border-left: 4px solid #e1306c; }
@@ -24,14 +24,16 @@
             <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-teal-400 flex items-center justify-center font-bold text-lg text-white shadow-lg">DM</div>
             <div>
                 <h1 class="font-bold text-lg leading-tight bg-gradient-to-r from-blue-400 to-teal-400 bg-clip-text text-transparent">DAKO MARKET</h1>
-                <p class="text-[10px] text-gray-400">Escrow Digital Asset Marketplace</p>
+                <p class="text-[10px] text-gray-400">Escrow Digital Marketplace</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
             <a href="tel:0961990973" class="flex items-center gap-1 bg-gray-800 hover:bg-gray-700 text-xs text-green-400 px-3 py-1.5 rounded-full border border-gray-700">
                 <i class="fa-solid fa-phone"></i> <span>0961990973</span>
             </a>
-            <button onclick="openModal('authModal')" class="bg-blue-600 hover:bg-blue-500 text-xs font-semibold px-4 py-2 rounded-lg transition">መለያ ግባ</button>
+            <button onclick="toggleAdminView()" id="adminToggleBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs px-3 py-1.5 rounded-lg border border-gray-700">
+                <i class="fa-solid fa-user-gear"></i> Admin
+            </button>
         </div>
     </header>
 
@@ -40,7 +42,7 @@
         <!-- Banner -->
         <div class="glass p-4 rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-950/40 to-transparent">
             <div class="flex items-center justify-between text-xs text-blue-400 font-semibold mb-1">
-                <span><i class="fa-solid fa-shield-halved"></i> 100% በሰዎች Escrow የተጠበቀ ንግድ</span>
+                <span><i class="fa-solid fa-shield-halved"></i> 100% በሰው Escrow የተጠበቀ ንግድ</span>
             </div>
             <p class="text-sm font-medium text-gray-200">የሶሻል ሚዲያ አካውንቶችን ያለምንም ስጋት በደህና ይግዙ ወይም ይሸጡ!</p>
         </div>
@@ -50,8 +52,8 @@
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400"><i class="fa-solid fa-store"></i></div>
                 <div>
-                    <p class="text-[11px] text-gray-400">አጠቃላይ ለሽያጭ የቀረቡ አካውንቶች ድምር</p>
-                    <p id="totalListingsCount" class="text-base font-bold text-white">2 አካውንቶች</p>
+                    <p class="text-[11px] text-gray-400">አጠቃላይ ለሽያጭ የቀረቡ አካውንቶች</p>
+                    <p id="totalListingsCount" class="text-base font-bold text-white">0 አካውንቶች</p>
                 </div>
             </div>
             <button onclick="renderListings('all')" class="text-gray-400 hover:text-white p-2"><i class="fa-solid fa-rotate-right"></i></button>
@@ -68,52 +70,110 @@
 
         <!-- Listings Container -->
         <div id="listingsContainer" class="space-y-3"></div>
+
+        <!-- Admin Pending Orders Approval Section (Visible in Admin Mode) -->
+        <div id="adminOrdersSection" class="hidden glass p-4 rounded-2xl border border-amber-500/30 space-y-3">
+            <h3 class="font-bold text-amber-400 text-sm flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i> ያልጸደቁ የክፍያ ማመልከቻዎች (Admin Only)</h3>
+            <div id="pendingOrdersList" class="space-y-3 text-xs">
+                <p class="text-gray-400 text-center">ምንም የሚጠበቅ ማመልከቻ የለም።</p>
+            </div>
+        </div>
     </main>
 
-    <!-- Buy / Checkout Modal -->
+    <!-- Buy / Payment Checkout Modal -->
     <div id="buyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="glass p-5 rounded-2xl max-w-sm w-full space-y-4 border border-gray-700">
+        <div class="glass p-5 rounded-2xl max-w-sm w-full space-y-4 border border-gray-700 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-gray-800 pb-2">
-                <h3 class="font-bold text-white">የEscrow ክፍያ መፈጸሚያ</h3>
+                <h3 class="font-bold text-white text-sm">የ Escrow ክፍያ መፈጸሚያ</h3>
                 <button onclick="closeModal('buyModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <p class="text-xs text-gray-300">አካውንቱን ለመግዛት የስልክ እና የቴሌግራም አድራሻዎን ያስገቡ። Admin በEscrow ገንዘቡን ይዞ አካውንቱን ያስረክብዎታል፦</p>
-            <input type="text" id="buyerPhone" placeholder="የስልክ ቁጥርዎ" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-blue-500">
-            <input type="text" id="buyerTelegram" placeholder="የቴሌግራም የተጠቃሚ ስም (@username)" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-blue-500">
-            <button onclick="submitBuy()" class="w-full bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 font-bold text-white py-3 rounded-xl text-xs shadow-lg">
-                በEscrow ግዢውን አረጋግጥ
+
+            <!-- Item Price Display -->
+            <div class="bg-blue-950/40 p-3 rounded-xl border border-blue-800/40 flex justify-between items-center">
+                <span class="text-xs text-gray-300">የሚከፈለው ጠቅላላ ዋጋ:</span>
+                <span id="modalPrice" class="text-base font-extrabold text-amber-400">0 ETB</span>
+            </div>
+
+            <!-- Payment Options -->
+            <div class="space-y-2">
+                <p class="text-xs text-gray-300 font-semibold">1. ከታች ባሉት አማራጮች ክፍያ ይፈጽሙ፦</p>
+                
+                <!-- Telebirr Account -->
+                <div class="bg-gray-900/90 p-3 rounded-xl border border-gray-800 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-sky-400 font-bold">Telebirr Account</p>
+                        <p class="text-xs font-bold text-white">0961990973</p>
+                        <p class="text-[10px] text-gray-400">Addisu Dereje</p>
+                    </div>
+                    <button onclick="copyToClipboard('0961990973')" class="bg-sky-600/20 hover:bg-sky-600/40 text-sky-400 text-xs px-3 py-1.5 rounded-lg border border-sky-500/30">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                </div>
+
+                <!-- CBE Birr Account -->
+                <div class="bg-gray-900/90 p-3 rounded-xl border border-gray-800 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] text-purple-400 font-bold">CBE Birr Account</p>
+                        <p class="text-xs font-bold text-white">0912122880</p>
+                        <p class="text-[10px] text-gray-400">Balemlay Dereje</p>
+                    </div>
+                    <button onclick="copyToClipboard('0912122880')" class="bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 text-xs px-3 py-1.5 rounded-lg border border-purple-500/30">
+                        <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Buyer Details Form -->
+            <div class="space-y-2 pt-2 border-t border-gray-800">
+                <p class="text-xs text-gray-300 font-semibold">2. መረጃዎን እና የክፍያ ደረሰኝ ያስገቡ፦</p>
+                <input type="text" id="buyerPhone" placeholder="የስልክ ቁጥርዎ" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-blue-500">
+                <input type="text" id="buyerTelegram" placeholder="የቴሌግራም አድራሻ (@username)" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-blue-500">
+                
+                <div>
+                    <label class="block text-[10px] text-gray-400 mb-1">የክፍያ ደረሰኝ/Screenshot የፎቶ ፋይል ይጫኑ፦</label>
+                    <input type="file" id="receiptUpload" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+                </div>
+            </div>
+
+            <button onclick="submitBuyRequest()" class="w-full bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 font-bold text-white py-3 rounded-xl text-xs shadow-lg">
+                <i class="fa-solid fa-paper-plane"></i> ክፍያውን ለAdmin አረጋግጥ
             </button>
         </div>
     </div>
 
     <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 py-2 px-6 flex justify-between items-center z-40 max-w-md mx-auto">
-        <button onclick="alert('ገበያ ላይ ነዎት')" class="flex flex-col items-center gap-1 text-blue-400">
+        <button onclick="renderListings('all')" class="flex flex-col items-center gap-1 text-blue-400">
             <i class="fa-solid fa-shop text-lg"></i>
             <span class="text-[10px]">ገበያ</span>
         </button>
-        <button onclick="alert('ዳሽቦርድ ለመጠቀም መጀመሪያ መለያ ይግቡ')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+        <button onclick="alert('የሻጭ ዳሽቦርድ በቅርቡ ይከፈታል')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
             <i class="fa-solid fa-chart-pie text-lg"></i>
             <span class="text-[10px]">ዳሽቦርድ</span>
         </button>
-        <button onclick="openModal('buyModal')" class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white shadow-lg -mt-6">
+        <button onclick="alert('አካውንት ለመለቀቅ በስልክ 0961990973 ያግኙን')" class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white shadow-lg -mt-6">
             <i class="fa-solid fa-plus text-xl"></i>
         </button>
         <button onclick="window.location.href='tel:0961990973'" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
             <i class="fa-solid fa-phone text-lg"></i>
             <span class="text-[10px]">ደውል</span>
         </button>
-        <button onclick="openModal('buyModal')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
-            <i class="fa-solid fa-user text-lg"></i>
-            <span class="text-[10px]">መለያ</span>
+        <button onclick="toggleAdminView()" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+            <i class="fa-solid fa-user-shield text-lg"></i>
+            <span class="text-[10px]">Admin</span>
         </button>
     </nav>
 
     <script>
+        let isAdmin = false;
+        let selectedItem = null;
+
         const sampleListings = [
             { id: 1, title: "Addise news", platform: "YouTube", subscribers: "22,000", price: 9000, sellerShare: 8100, status: "ACTIVE" },
             { id: 2, title: "1000tiktok", platform: "TikTok", subscribers: "15,000", price: 4500, sellerShare: 4050, status: "ACTIVE" }
         ];
+
+        let pendingOrders = [];
 
         function renderListings(filter) {
             const container = document.getElementById('listingsContainer');
@@ -129,16 +189,18 @@
                         </div>
                         <span class="text-[10px] text-green-400 font-semibold bg-green-500/10 px-2 py-1 rounded-lg">${item.status}</span>
                     </div>
+                    
                     <div class="flex justify-between items-center text-xs text-gray-300">
                         <span>ተከታይ/Subscribers: <strong>${item.subscribers}</strong></span>
-                        <span>የ90% ሻጭ ድርሻ: <strong class="text-green-400">${item.sellerShare.toLocaleString()} ETB</strong></span>
+                        ${isAdmin ? `<span class="text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded">90% የሻጭ ድርሻ: ${item.sellerShare.toLocaleString()} ETB</span>` : ''}
                     </div>
+
                     <div class="flex justify-between items-center pt-2 border-t border-gray-800">
                         <div>
                             <p class="text-[10px] text-gray-400">ዋጋ</p>
                             <p class="text-base font-extrabold text-amber-400">${item.price.toLocaleString()} ETB</p>
                         </div>
-                        <button onclick="openModal('buyModal')" class="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg">
+                        <button onclick="openBuyModal(${item.id})" class="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg">
                             <i class="fa-solid fa-cart-shopping"></i> Buy
                         </button>
                     </div>
@@ -146,15 +208,94 @@
             `).join('');
         }
 
+        function toggleAdminView() {
+            isAdmin = !isAdmin;
+            const adminSec = document.getElementById('adminOrdersSection');
+            const btn = document.getElementById('adminToggleBtn');
+            if(isAdmin) {
+                adminSec.classList.remove('hidden');
+                btn.classList.add('bg-amber-600', 'text-white');
+                alert('Admin Mode በርቷል! አሁን የ90% የሻጭ ድርሻ እና ያልጸደቁ ክፍያዎችን ማየት ይችላሉ።');
+            } else {
+                adminSec.classList.add('hidden');
+                btn.classList.remove('bg-amber-600', 'text-white');
+            }
+            renderListings('all');
+            renderPendingOrders();
+        }
+
+        function openBuyModal(id) {
+            selectedItem = sampleListings.find(i => i.id === id);
+            document.getElementById('modalPrice').innerText = `${selectedItem.price.toLocaleString()} ETB`;
+            openModal('buyModal');
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+            alert(`የአካውንት ቁጥር ${text} ኮፒ ተደርጓል!`);
+        }
+
+        function submitBuyRequest() {
+            const phone = document.getElementById('buyerPhone').value;
+            const telegram = document.getElementById('buyerTelegram').value;
+            const receipt = document.getElementById('receiptUpload').files[0];
+
+            if(!phone || !receipt) {
+                alert('እባክዎ የስልክ ቁጥርዎን እና የክፍያ ደረሰኝ ፎቶ ያስገቡ!');
+                return;
+            }
+
+            const newOrder = {
+                id: Date.now(),
+                itemTitle: selectedItem.title,
+                price: selectedItem.price,
+                buyerPhone: phone,
+                buyerTelegram: telegram || 'የለም',
+                receiptName: receipt.name,
+                status: 'PENDING'
+            };
+
+            pendingOrders.push(newOrder);
+            alert('የክፍያ ደረሰኝዎ ለ Admin ተልኳል! Admin ደረሰኙን አይቶ Approve ሲያደርገው አካውንቱ ይደርስዎታል።');
+            closeModal('buyModal');
+            renderPendingOrders();
+        }
+
+        function renderPendingOrders() {
+            const container = document.getElementById('pendingOrdersList');
+            if(pendingOrders.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center">ምንም የሚጠበቅ ማመልከቻ የለም።</p>';
+                return;
+            }
+
+            container.innerHTML = pendingOrders.map(order => `
+                <div class="bg-gray-900 p-3 rounded-xl border border-gray-800 space-y-2">
+                    <div class="flex justify-between font-bold text-white">
+                        <span>${order.itemTitle}</span>
+                        <span class="text-amber-400">${order.price.toLocaleString()} ETB</span>
+                    </div>
+                    <p class="text-gray-300">ስልክ: ${order.buyerPhone} | Telegram: ${order.buyerTelegram}</p>
+                    <p class="text-gray-400">ደረሰኝ: <span class="text-blue-400">${order.receiptName}</span></p>
+                    ${order.status === 'PENDING' ? `
+                        <button onclick="approveOrder(${order.id})" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-1.5 rounded-lg text-xs">
+                            <i class="fa-solid fa-check"></i> ብር መግባቱን አረጋግጥ (Approve)
+                        </button>
+                    ` : '<span class="text-green-400 font-bold block text-center">APPROVED ✓</span>'}
+                </div>
+            `).join('');
+        }
+
+        function approveOrder(orderId) {
+            const order = pendingOrders.find(o => o.id === orderId);
+            if(order) {
+                order.status = 'APPROVED';
+                alert(`የ ${order.itemTitle} ክፍያ በስኬት ጸድቋል! አካውንቱን ለገዢው ማስረከብ ይችላሉ።`);
+                renderPendingOrders();
+            }
+        }
+
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-        function submitBuy() {
-            const phone = document.getElementById('buyerPhone').value;
-            if(!phone) { alert('እባክዎ የስልክ ቁጥርዎን ያስገቡ!'); return; }
-            alert('ትእዛዝዎ በስኬት ተልኳል! Admin በስልክ ቁጥርዎ ' + phone + ' ይደውልልዎታል ወይም በ 0961990973 ይደውሉልን።');
-            closeModal('buyModal');
-        }
 
         window.onload = () => renderListings('all');
     </script>
