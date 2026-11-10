@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="am">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DAKO MARKET - Ultimate Escrow Platform</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #3b82f6;
+    --primary-glow: rgba(59, 130, 246, 0.5);
+    --accent: #10b981;
+    --accent-glow: rgba(16, 185, 129, 0.4);
+    --warning: #f59e0b;
+    --bg-color: #030712;
+    --card-bg: rgba(17, 24, 39, 0.7);
+    --border-color: rgba(55, 65, 81, 0.5);
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --radius: 16px;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background-color: var(--bg-color);
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.2) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(6, 95, 70, 0.15) 0px, transparent 50%);
+    color: var(--text-main);
+    font-family: 'Noto Sans Ethiopic', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 25px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    background: linear-gradient(135deg, #60a5fa, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+  }
+  header p {
+    margin: 6px 0 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .wrap {
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+  .card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+
+  h2 {
+    font-size: 19px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: #f3f4f6;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  input, select, textarea, button {
+    font: inherit;
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border-color);
+    background: rgba(3, 7, 18, 0.8);
+    color: var(--text-main);
+    border-radius: 12px;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    transition: all 0.3s ease;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 15px var(--primary-glow);
+    background: rgba(3, 7, 18, 0.95);
+  }
+
+  button {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+    transform: translateY(-1px);
+  }
+  button:active { transform: scale(0.98); }
+  
+  button.secondary {
+    background: rgba(31, 41, 55, 0.8);
+    color: #e5e7eb;
+    border: 1px solid var(--border-color);
+    box-shadow: none;
+  }
+  button.secondary:hover {
+    background: rgba(55, 65, 81, 0.9);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+
+  button.success {
+    background: linear-gradient(135deg, #059669, #047857);
+    box-shadow: 0 4px 15px var(--accent-glow);
+  }
+  button.success:hover {
+    background: linear-gradient(135deg, #047857, #065f46);
+    box-shadow: 0 6px 20px var(--accent-glow);
+  }
+
+  .muted { color: var(--text-muted); font-size: 14px; }
+  .row { display: flex; gap: 12px; }
+  .row > * { flex: 1; }
+  .hidden { display: none !important; }
+
+  .notice {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fde68a;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.05);
+  }
+
+  /* Glowing Ad Banner Carousel */
+  .ad-banner-container {
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.9), rgba(30, 58, 138, 0.3));
+    border: 1px dashed rgba(96, 165, 250, 0.5);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.15);
+  }
+  .ad-carousel {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .ad-slide {
+    min-width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+  }
+  .ad-placeholder {
+    padding: 30px 20px;
+    color: #60a5fa;
+    font-weight: 700;
+    font-size: 15px;
+    background: rgba(59, 130, 246, 0.08);
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
+  }
+
+  .item {
+    background: rgba(3, 7, 18, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 16px;
+    transition: all 0.3s ease;
+  }
+  .item:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    transform: translateY(-2px);
+  }
+  
+  .badge {
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+  
+  .price {
+    font-weight: 800;
+    color: #34d399;
+    font-size: 20px;
+    margin-top: 10px;
+    text-shadow: 0 0 15px rgba(52, 211, 153, 0.3);
+  }
+
+  .escrow-box {
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 14px;
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .status-available { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+  .status-locked { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); animation: pulse 2s infinite; }
+  .status-completed { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>DAKO MARKET</h1>
+    <p>የዓለም አቀፍ ደረጃ ያለው የ Escrow የዲጂታል እቃዎች ገበያ</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="notice">
+    <strong>🔒 100% አስተማማኝ የ Escrow ስርዓት፦</strong> ገዢው አካውንቱን መርጦ ክፍያ ሲፈጽም ገንዘቡ በአድሚን ቁጥጥር ስር (Locked) ይቀመጣል። ሻጩ አካውንቱን አስረክቦ እስኪያረጋግጥ ድረስ ገንዘቡ ፍጹም ደህንነቱ የተጠበቀ ነው።
+  </div>
+
+  <!-- Animated Glowing Ad Banner / Carousel -->
+  <section class="card ad-banner-container">
+    <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">✨ Sponsored Ads / ስፖንሰር የተደረጉ ማስታወቂያዎች</div>
+    <div class="ad-carousel" id="adCarousel">
+      <div class="ad-slide">
+        <div class="ad-placeholder">📢 እዚህ ላይ ተንቀሳቃሽ ምስል (GIF) ወይም የቪዲዮ ማስታወቂያዎን ያስገቡ</div>
+      </div>
+      <div class="ad-slide">
+        <div class="ad-placeholder">⭐ ቻናልዎን ወይም ዲጂታል ንግድዎን በዚህ የሚያብረቀርቅ ቦታ ያስተዋውቁ!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Auth Section -->
+  <section class="card">
+    <h2>👤 መለያ ግባ / ፍጠር</h2>
+    <input id="email" type="email" placeholder="ኢሜይል አድራሻ">
+    <input id="password" type="password" placeholder="ሚስጥራዊ ቁጥር (Password)">
+    <div class="row">
+      <button id="signup">መለያ ፍጠር</button>
+      <button id="login" class="secondary">ግባ</button>
+    </div>
+    <button id="logout" class="secondary hidden" style="margin-top: 12px;">ከመለያ ውጣ</button>
+    <p id="authmsg" class="muted" style="margin-top: 12px; text-align: center;">ከመለያህ ግባ ወይም አዲስ ፍጠር።</p>
+  </section>
+
+  <!-- Listings Section -->
+  <section class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="margin: 0; border: none; padding: 0;">🛒 የሚገኙ ማስታወቂያዎች (Escrow Protected)</h2>
+      <button id="refresh" class="secondary" style="width: auto; padding: 8px 18px; margin: 0; font-size: 13px;">አድስ</button>
+    </div>
+    <hr style="border: none; border-top: 1px solid var(--border-color); margin: 14px 0 16px;">
+    <div id="listings" class="muted" style="text-align: center; padding: 20px;">ማስታወቂያዎች በመጫን ላይ...</div>
+  </section>
+
+  <!-- Create Listing Section -->
+  <section class="card">
+    <h2>＋ አዲስ ማስታወቂያ አስገባ (ለሻጮች)</h2>
+    <p class="muted">አካውንት ለመሸጥ መጀመሪያ ከመለያህ መግባት አለብህ።</p>
+    <input id="title" placeholder="የእቃው / የገጹ ርዕስ (ለምሳሌ፡ 20k TikTok Account)">
+    <select id="platform">
+      <option>Facebook</option>
+      <option>TikTok</option>
+      <option>YouTube</option>
+      <option>Instagram</option>
+      <option>Telegram</option>
+    </select>
+    <textarea id="description" rows="3" placeholder="ስለ አካውንቱ ዝርዝር መግለጫ ያስገቡ..."></textarea>
+    <input id="followers" placeholder="ተከታይ/መጠን (ለምሳሌ፡ 50k Followers)">
+    <input id="price" type="number" min="1" step="0.01" placeholder="ዋጋ በ (ETB)">
+    <button id="publish">ማስታወቂያውን በስኬት አስገባ</button>
+    <p id="publishmsg" class="muted" style="margin-top: 12px; text-align: center;"></p>
+  </section>
+</main>
+
+<script>
+  const SUPABASE_URL='https://luffobxejghgpfwfsnnn.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY='sb_publishable_5UQGIXDXSC3BGt9MSR-adA_YMJaHwVp';
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+  const $=id=>document.getElementById(id); 
+  let currentUser=null;
+
+  // Animated Ad Carousel Slider
+  let currentSlide = 0;
+  function nextSlide() {
+    const slides = document.querySelectorAll('.ad-slide');
+    if(slides.length > 1) {
+      currentSlide = (currentSlide + 1) % slides.length;
+      $('adCarousel').style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
+  }
+  setInterval(nextSlide, 4500);
+
+  async function session(){
+    const {data}=await sb.auth.getSession();
+    currentUser=data.session?.user||null;
+    $('logout').classList.toggle('hidden',!currentUser);
+  }
+
+  async function auth(action){
+    const email=$('email').value.trim(),password=$('password').value;
+    if(!email||!password){$('authmsg').textContent='እባክዎን ኢሜይልና ፓስወርድ ያስገቡ።';return}
+    let r=action==='signup'?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});
+    $('authmsg').textContent=r.error?r.error.message:(action==='signup'?'መለያ ተፈጥሯል። ኢሜይልህን አረጋግጥ።':'በስኬት ገብተሃል!');
+    await session();
+  }
+
+  async function load(){
+    const box=$('listings');
+    box.textContent='በመጫን ላይ...';
+    const {data,error}=await sb.from('listings').select('id,title,platform,description,followers,price_etb,status,created_at').order('created_at',{ascending:false}).limit(50);
+    if(error){box.textContent='ማስታወቂያዎችን መጫን አልተቻለም፦ '+error.message;return}
+    if(!data.length){box.textContent='እስካሁን ምንም ማስታወቂያ አልተለጠፈም።';return}
+    
+    box.innerHTML=data.map(x=>{
+      let statusClass = 'status-available';
+      let statusText = '🟢 ክፍት / ለመግዛት ዝግጁ';
+      let actionBtn = `<button class="success" onclick="startEscrow('${x.id}', '${x.title}', ${x.price_etb})">💳 ክፍያ ፈጽምና Escrow ጀምር</button>`;
+      
+      if(x.status === 'locked') {
+        statusClass = 'status-locked';
+        statusText = '🔒 ገንዘብ በአድሚን ተይዟል (Locked)';
+        actionBtn = `<p class="muted" style="margin-top:10px; color:#fbbf24; font-weight:600;">⚠️ ክፍያ ተፈጽሟል። አድሚን ገንዘቡን ይዟል። ሻጭ አካውንቱን እያስረከበ ነው።</p>`;
+      } else if(x.status === 'completed') {
+        statusClass = 'status-completed';
+        statusText = '✅ ንግድ ተጠናቋል (Sold)';
+        actionBtn = `<p class="muted" style="margin-top:10px; color:#60a5fa; font-weight:600;">✨ ይህ አካውንት በስኬት ተሸጧል።</p>`;
+      }
+
+      return `
+        <div class="item">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="font-size: 17px; color: #f3f4f6;">${esc(x.title)}</strong>
+            <span class="badge">${esc(x.platform)}</span>
+          </div>
+          <div class="muted" style="margin-top: 6px; font-weight: 500;">👥 ${esc(x.followers||'መጠን አልተገለጸም')}</div>
+          <p style="margin: 10px 0; font-size: 14px; color: #d1d5db;">${esc(x.description||'')}</p>
+          <div class="price">${Number(x.price_etb).toLocaleString()} ETB</div>
+          <div class="escrow-box">
+            <div style="margin-bottom: 8px;"><span class="status-badge ${statusClass}">${statusText}</span></div>
+            <div>${actionBtn}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+  async function startEscrow(id, title, price) {
+    if(!currentUser){
+      alert('እባክዎን መጀመሪያ ከመለያዎ ይግቡ።');
+      return;
+    }
+    let confirmBuy = confirm(`"${title}" የተባለውን አካውንት በ ${price} ETB በ Escrow (በአድሚን አማካኝነት) ለመግዛት እርግጠኛ ኖት? ክፍያውን ሲፈጽሙ ገንዘቡ ለአድሚን ይተላለፋል።`);
+    if(!confirmBuy) return;
+
+    const {error} = await sb.from('listings').update({status: 'locked'}).eq('id', id);
+    if(error) {
+      alert('ስህተት ተፈጥሯል፦ ' + error.message);
+    } else {
+      alert('ክፍያዎ ተመዝግቧል! ገንዘቡ በአድሚን ተይዟል (Locked). አሁን ሻጩ አካውንቱን ለገዢ አስረክቦ እስኪያረጋግጥ ይጠብቁ።');
+      load();
+    }
+  }
+
+  async function publish(){
+    if(!currentUser){$('publishmsg').textContent='መጀመሪያ ከመለያህ ግባ።';return}
+    const title=$('title').value.trim(),price=Number($('price').value);
+    if(!title||!price||price<=0){$('publishmsg').textContent='እባክዎን ርዕስ እና ትክክለኛ ዋጋ ያስገቡ።';return}
+    const {error}=await sb.from('listings').insert({
+      seller_id:currentUser.id,
+      title,
+      platform:$('platform').value,
+      description:$('description').value.trim(),
+      followers:$('followers').value.trim(),
+      price_etb:price,
+      status: 'available'
+    });
+    $('publishmsg').textContent=error?error.message:'ማስታወቂያው በተሳካ ሁኔታ ተጨምሯል!';
+    if(!error){
+      $('title').value='';$('description').value='';$('followers').value='';$('price').value='';
+      load();
+    }
+  }
+
+  $('signup').onclick=()=>auth('signup');
+  $('login').onclick=()=>auth('login');
+  $('logout').onclick=async()=>{await sb.auth.signOut();await session();};
+  $('refresh').onclick=load;
+  $('publish').onclick=publish;
+  sb.auth.onAuthStateChange(()=>session());
+  session();
+  load();
+</script>
+</body>
+</html>
