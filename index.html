@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DAKO MARKET - Ultimate Escrow Marketplace</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #0b0f19; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
@@ -32,7 +31,7 @@
             <a href="tel:0961990973" class="flex items-center gap-1 bg-gray-800 hover:bg-gray-700 text-xs text-green-400 px-3 py-1.5 rounded-full border border-gray-700">
                 <i class="fa-solid fa-phone"></i> <span>0961990973</span>
             </a>
-            <button onclick="openAuthModal()" class="bg-blue-600 hover:bg-blue-500 text-xs font-semibold px-4 py-2 rounded-lg transition">መለያ ግባ</button>
+            <button onclick="openModal('authModal')" class="bg-blue-600 hover:bg-blue-500 text-xs font-semibold px-4 py-2 rounded-lg transition">መለያ ግባ</button>
         </div>
     </header>
 
@@ -52,89 +51,94 @@
                 <div class="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400"><i class="fa-solid fa-store"></i></div>
                 <div>
                     <p class="text-[11px] text-gray-400">አጠቃላይ ለሽያጭ የቀረቡ አካውንቶች ድምር</p>
-                    <p id="totalListingsCount" class="text-base font-bold text-white">0 አካውንቶች</p>
+                    <p id="totalListingsCount" class="text-base font-bold text-white">2 አካውንቶች</p>
                 </div>
             </div>
-            <button onclick="loadListings()" class="text-gray-400 hover:text-white p-2"><i class="fa-solid fa-rotate-right"></i></button>
+            <button onclick="renderListings('all')" class="text-gray-400 hover:text-white p-2"><i class="fa-solid fa-rotate-right"></i></button>
         </div>
 
         <!-- Filter Buttons -->
         <div class="flex gap-2 overflow-x-auto pb-1 text-xs">
-            <button onclick="filterPlatform('all')" class="bg-blue-600 text-white px-4 py-2 rounded-xl whitespace-nowrap">ሁሉም</button>
-            <button onclick="filterPlatform('TikTok')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-tiktok text-pink-500"></i> TikTok</button>
-            <button onclick="filterPlatform('YouTube')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-youtube text-red-500"></i> YouTube</button>
-            <button onclick="filterPlatform('Telegram')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-telegram text-sky-400"></i> Telegram</button>
-            <button onclick="filterPlatform('Instagram')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-instagram text-purple-400"></i> Instagram</button>
+            <button onclick="renderListings('all')" class="bg-blue-600 text-white px-4 py-2 rounded-xl whitespace-nowrap">ሁሉም</button>
+            <button onclick="renderListings('TikTok')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-tiktok text-pink-500"></i> TikTok</button>
+            <button onclick="renderListings('YouTube')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-youtube text-red-500"></i> YouTube</button>
+            <button onclick="renderListings('Telegram')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-telegram text-sky-400"></i> Telegram</button>
+            <button onclick="renderListings('Instagram')" class="glass text-gray-300 px-4 py-2 rounded-xl whitespace-nowrap"><i class="fa-brands fa-instagram text-purple-400"></i> Instagram</button>
         </div>
 
         <!-- Listings Container -->
-        <div id="listingsContainer" class="space-y-3">
-            <div class="text-center py-8 text-gray-400 text-sm">አካውንቶች በመጫን ላይ ናቸው...</div>
-        </div>
+        <div id="listingsContainer" class="space-y-3"></div>
     </main>
+
+    <!-- Buy / Checkout Modal -->
+    <div id="buyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass p-5 rounded-2xl max-w-sm w-full space-y-4 border border-gray-700">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+                <h3 class="font-bold text-white">የEscrow ክፍያ መፈጸሚያ</h3>
+                <button onclick="closeModal('buyModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-gray-300">አካውንቱን ለመግዛት የስልክ እና የቴሌግራም አድራሻዎን ያስገቡ። Admin በEscrow ገንዘቡን ይዞ አካውንቱን ያስረክብዎታል፦</p>
+            <input type="text" id="buyerPhone" placeholder="የስልክ ቁጥርዎ" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-blue-500">
+            <input type="text" id="buyerTelegram" placeholder="የቴሌግራም የተጠቃሚ ስም (@username)" class="w-full bg-gray-900 border border-gray-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-blue-500">
+            <button onclick="submitBuy()" class="w-full bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-500 hover:to-emerald-400 font-bold text-white py-3 rounded-xl text-xs shadow-lg">
+                በEscrow ግዢውን አረጋግጥ
+            </button>
+        </div>
+    </div>
 
     <!-- Bottom Navigation Bar -->
     <nav class="fixed bottom-0 left-0 right-0 glass border-t border-gray-800 py-2 px-6 flex justify-between items-center z-40 max-w-md mx-auto">
-        <button onclick="switchTab('market')" class="flex flex-col items-center gap-1 text-blue-400">
+        <button onclick="alert('ገበያ ላይ ነዎት')" class="flex flex-col items-center gap-1 text-blue-400">
             <i class="fa-solid fa-shop text-lg"></i>
             <span class="text-[10px]">ገበያ</span>
         </button>
-        <button onclick="switchTab('dashboard')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+        <button onclick="alert('ዳሽቦርድ ለመጠቀም መጀመሪያ መለያ ይግቡ')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
             <i class="fa-solid fa-chart-pie text-lg"></i>
             <span class="text-[10px]">ዳሽቦርድ</span>
         </button>
-        <button onclick="openSellModal()" class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white shadow-lg -mt-6">
+        <button onclick="openModal('buyModal')" class="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white shadow-lg -mt-6">
             <i class="fa-solid fa-plus text-xl"></i>
         </button>
-        <button onclick="switchTab('chat')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
-            <i class="fa-solid fa-comments text-lg"></i>
-            <span class="text-[10px]">አድሚን ቻት</span>
+        <button onclick="window.location.href='tel:0961990973'" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+            <i class="fa-solid fa-phone text-lg"></i>
+            <span class="text-[10px]">ደውል</span>
         </button>
-        <button onclick="switchTab('account')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
+        <button onclick="openModal('buyModal')" class="flex flex-col items-center gap-1 text-gray-400 hover:text-white">
             <i class="fa-solid fa-user text-lg"></i>
             <span class="text-[10px]">መለያ</span>
         </button>
     </nav>
 
-    <!-- JavaScript Logic -->
     <script>
-        const SUPABASE_URL = "YOUR_SUPABASE_URL";
-        const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const sampleListings = [
+            { id: 1, title: "Addise news", platform: "YouTube", subscribers: "22,000", price: 9000, sellerShare: 8100, status: "ACTIVE" },
+            { id: 2, title: "1000tiktok", platform: "TikTok", subscribers: "15,000", price: 4500, sellerShare: 4050, status: "ACTIVE" }
+        ];
 
-        let currentUser = null;
-
-        async function init() {
-            const { data: { user } } = await supabase.auth.getUser();
-            currentUser = user;
-            loadListings();
-        }
-
-        async function loadListings() {
-            const { data, error } = await supabase.from('listings').select('*');
+        function renderListings(filter) {
             const container = document.getElementById('listingsContainer');
-            if (error || !data || data.length === 0) {
-                container.innerHTML = `<div class="glass p-6 text-center rounded-2xl space-y-3"><p class="text-gray-400 text-sm">እስካሁን ምንም የሚሸጥ አካውንት አልተለጠፈም።</p><button onclick="openSellModal()" class="bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">አካውንት ለሽያጭ ፖስት አድርግ</button></div>`;
-                document.getElementById('totalListingsCount').innerText = "0 አካውንቶች";
-                return;
-            }
-            document.getElementById('totalListingsCount').innerText = `${data.length} አካውንቶች`;
-            
-            container.innerHTML = data.map(item => `
-                <div class="glass p-4 rounded-2xl space-y-3 platform-${item.platform ? item.platform.toLowerCase() : 'tiktok'}">
+            const items = filter === 'all' ? sampleListings : sampleListings.filter(i => i.platform === filter);
+            document.getElementById('totalListingsCount').innerText = `${items.length} አካውንቶች`;
+
+            container.innerHTML = items.map(item => `
+                <div class="glass p-4 rounded-2xl space-y-3 platform-${item.platform.toLowerCase()}">
                     <div class="flex justify-between items-start">
                         <div>
-                            <span class="text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">${item.platform || 'Social'}</span>
+                            <span class="text-[10px] uppercase font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">${item.platform}</span>
                             <h3 class="font-bold text-base text-white mt-1">${item.title}</h3>
                         </div>
-                        <span class="text-[10px] text-green-400 font-semibold bg-green-500/10 px-2 py-1 rounded-lg">${item.status || 'ACTIVE'}</span>
+                        <span class="text-[10px] text-green-400 font-semibold bg-green-500/10 px-2 py-1 rounded-lg">${item.status}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-300">
+                        <span>ተከታይ/Subscribers: <strong>${item.subscribers}</strong></span>
+                        <span>የ90% ሻጭ ድርሻ: <strong class="text-green-400">${item.sellerShare.toLocaleString()} ETB</strong></span>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t border-gray-800">
                         <div>
                             <p class="text-[10px] text-gray-400">ዋጋ</p>
-                            <p class="text-base font-extrabold text-amber-400">${item.price ? item.price.toLocaleString() : 0} ETB</p>
+                            <p class="text-base font-extrabold text-amber-400">${item.price.toLocaleString()} ETB</p>
                         </div>
-                        <button onclick="alert('ግዢ ለመፈጸም እባክዎ በስልክ ቁጥር 0961990973 ይደውሉልን።')" class="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg">
+                        <button onclick="openModal('buyModal')" class="bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-500 hover:to-teal-400 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-lg">
                             <i class="fa-solid fa-cart-shopping"></i> Buy
                         </button>
                     </div>
@@ -142,23 +146,17 @@
             `).join('');
         }
 
-        function openSellModal() {
-            alert("አካውንት ለመለጠፍ እባክዎ መጀመሪያ መለያ ይግቡ (Sign In)።");
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function submitBuy() {
+            const phone = document.getElementById('buyerPhone').value;
+            if(!phone) { alert('እባክዎ የስልክ ቁጥርዎን ያስገቡ!'); return; }
+            alert('ትእዛዝዎ በስኬት ተልኳል! Admin በስልክ ቁጥርዎ ' + phone + ' ይደውልልዎታል ወይም በ 0961990973 ይደውሉልን።');
+            closeModal('buyModal');
         }
 
-        function openAuthModal() {
-            alert("የመግቢያ (Login/Signup) ገጽ በሂደት ላይ ነው።");
-        }
-
-        function switchTab(tab) {
-            if(tab === 'chat') {
-                alert("የአድሚን ቻት አገልግሎት በድምፅ እና በስልክ ቁጥር 0961990973 በመደወል ማግኘት ይችላሉ።");
-            } else if(tab === 'dashboard') {
-                alert("የሻጭ ዳሽቦርድ እና የገንዘብ ማውጫ (Payout) ለመጠቀም መለያ መግባት ይኖርብዎታል።");
-            }
-        }
-
-        window.onload = init;
+        window.onload = () => renderListings('all');
     </script>
 </body>
 </html>
